@@ -1,0 +1,3753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copat Screen Recorder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f0f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            gap: 60px;
+            position: relative;
+        }
+
+        /* Static Main Menu - Fixed Center Position */
+        .config-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 2px solid #2C3E50;
+            width: 280px;
+            height: fit-content;
+            position: fixed;
+            left: 50%;
+            top: 60%;
+            transform: translate(-50%, -50%);
+            z-index: 996;
+            user-select: none;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.7) rotate(12deg);
+            transition: all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .config-container.ready {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        }
+
+        .config-header {
+            text-align: center;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #ECF0F1;
+        }
+
+        .config-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4a5d4a;
+            margin-bottom: 4px;
+        }
+
+        .config-subtitle {
+            font-size: 12px;
+            color: #7F8C8D;
+            margin-bottom: 12px;
+        }
+
+        .bookmarklet-preview {
+            background: linear-gradient(135deg, #F8F9FA, #ECF0F1);
+            border: 1px solid #BDC3C7;
+            border-radius: 6px;
+            padding: 8px;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .bookmarklet-instruction {
+            font-size: 10px;
+            color: #7F8C8D;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .bookmarklet-button {
+            display: inline-block;
+            background: #F4D03F;
+            color: #2C3E50;
+            padding: 8px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 12px;
+            border: 1px solid #F1C40F;
+            cursor: move;
+            transition: all 0.2s ease;
+            user-select: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .bookmarklet-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+            background: #F1C40F;
+        }
+
+        .config-section {
+            margin-bottom: 16px;
+        }
+
+        .config-section:last-of-type {
+            margin-bottom: 20px;
+        }
+
+        .config-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2C3E50;
+            margin-bottom: 8px;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+        }
+
+        .toggle-track {
+            width: 50px;
+            height: 24px;
+            background: #ECF0F1;
+            border-radius: 12px;
+            border: 1px solid #BDC3C7;
+            position: relative;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .toggle-track:hover {
+            border-color: #2C3E50;
+        }
+
+        .toggle-thumb {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: #3498DB;
+            border-radius: 50%;
+            border: 1px solid #2C3E50;
+            left: 3px;
+            top: 2px;
+            transition: left 0.3s ease;
+        }
+
+        .toggle-switch.active .toggle-thumb {
+            left: 28px;
+            background: #E67E22;
+        }
+
+        .toggle-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #7F8C8D;
+            transition: color 0.2s ease;
+            flex: 1;
+            text-align: center;
+        }
+
+        .toggle-label.left {
+            text-align: left;
+        }
+
+        .toggle-label.right {
+            text-align: right;
+        }
+
+        .toggle-switch:not(.active) .toggle-label.left {
+            color: #2C3E50;
+            font-weight: 700;
+        }
+
+        .toggle-switch.active .toggle-label.right {
+            color: #2C3E50;
+            font-weight: 700;
+        }
+
+        /* Create Button */
+        .create-button {
+            width: 100%;
+            background: #ECF0F1;
+            color: #2C3E50;
+            border: 1px solid #BDC3C7;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .create-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(44, 62, 80, 0.2);
+            border-color: #2C3E50;
+            background: #E8EAED;
+        }
+
+        .create-button:active {
+            transform: translateY(0);
+        }
+
+        .create-button.updated {
+            background: #7BC3D1;
+            color: #E67E22;
+            border-color: #5DADE2;
+            font-weight: bold;
+        }
+
+        .copat-widget {
+            width: 120px;
+            height: 140px;
+            position: fixed;
+            left: 50%;
+            top: 15%;
+            transform: translateX(-50%);
+            cursor: move;
+            user-select: none;
+            z-index: 998;
+            opacity: 0;
+            transform: translateX(-50%) scale(3) rotate(180deg);
+            filter: blur(8px);
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .copat-widget.ready {
+            opacity: 1;
+            transform: translateX(-50%) scale(1) rotate(0deg);
+            filter: blur(0px);
+        }
+
+        /* Copat Head */
+        .copat-head {
+            width: 120px;
+            height: 95px;
+            background: #7BC3D1;
+            border: 4px solid #2C3E50;
+            border-radius: 18px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .copat-head.head-hover {
+            box-shadow: 0 0 15px rgba(244, 208, 63, 0.4), 0 0 30px rgba(244, 208, 63, 0.2), 0 0 45px rgba(244, 208, 63, 0.1);
+        }
+
+        @keyframes headPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Eyes */
+        .copat-eyes {
+            display: flex;
+            gap: 32px;
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .eye {
+            width: 18px;
+            height: 18px;
+            background: #2C3E50;
+            border-radius: 50%;
+            animation: blink 3s infinite;
+        }
+
+        @keyframes blink {
+            0%, 90% { 
+                height: 18px;
+                transform: scaleY(1);
+            }
+            95% { 
+                height: 18px;
+                transform: scaleY(0.1);
+            }
+            100% { 
+                height: 18px;
+                transform: scaleY(1);
+            }
+        }
+
+        .eye.wink {
+            animation: none;
+            height: 2px;
+        }
+
+        /* Clean countdown - no mouth changes */
+
+        /* Mouth */
+        .copat-mouth {
+            position: absolute;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 4px;
+            background: #2C3E50;
+            border-radius: 0 0 24px 24px;
+            clip-path: ellipse(50% 100% at 50% 0%);
+            transition: all 0.5s ease;
+        }
+
+        .copat-head.head-hover .copat-mouth {
+            width: 48px;
+            height: 7px;
+            border-radius: 0 0 48px 48px;
+            clip-path: ellipse(50% 100% at 50% 0%);
+        }
+
+        /* Band-aid/Plaster */
+        .bandaid {
+            position: absolute;
+            top: -5px;
+            right: 10px;
+            width: 35px;
+            height: 15px;
+            background: #F4D03F;
+            border-radius: 8px;
+            border: 2px solid #2C3E50;
+            transform: rotate(15deg);
+            transition: all 0.3s ease;
+            cursor: move;
+        }
+
+        .bandaid:hover.can-animate {
+            transform: rotate(15deg) scale(2.5);
+            animation: copatWiggle 0.8s ease-out;
+        }
+
+        .bandaid:hover:not(.can-animate) {
+            transform: rotate(15deg) scale(2.5);
+        }
+
+        @keyframes copatWiggle {
+            0% { transform: rotate(15deg) scale(1); }
+            30% { transform: rotate(18deg) scale(2.2); }
+            70% { transform: rotate(12deg) scale(2.3); }
+            100% { transform: rotate(15deg) scale(2.5); }
+        }
+
+        .bandaid::before,
+        .bandaid::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #E67E22;
+            border-radius: 50%;
+        }
+
+        .bandaid::before {
+            top: 3px;
+            left: 6px;
+            box-shadow: 8px 0 0 #E67E22, 16px 0 0 #E67E22;
+        }
+
+        .bandaid::after {
+            bottom: 3px;
+            left: 6px;
+            box-shadow: 8px 0 0 #E67E22, 16px 0 0 #E67E22;
+        }
+
+        .bandaid.countdown {
+            animation: bandaidBlink 0.5s infinite;
+        }
+
+        .bandaid.recording {
+            background: #E74C3C;
+            animation: bandaidPulse 1s infinite;
+        }
+
+        @keyframes bandaidBlink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        @keyframes bandaidPulse {
+            0%, 100% { background: #E74C3C; }
+            50% { background: #C0392B; }
+        }
+
+        /* Body/Timer Display */
+        .copat-body {
+            width: 85px;
+            height: 40px;
+            background: #7BC3D1;
+            border: 4px solid #2C3E50;
+            border-radius: 12px;
+            margin: 5px auto 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #2C3E50;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .copat-body.recording {
+            animation: bodyPulse 1.5s infinite;
+        }
+
+        @keyframes bodyPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: #E67E22;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .copat-body.processing {
+            animation: processingPulse 1s infinite;
+        }
+
+        @keyframes processingPulse {
+            0%, 100% { background: #7BC3D1; }
+            50% { background: #5DADE2; }
+        }
+
+        /* Controls */
+        .controls {
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .control-btn {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn {
+            background: #E74C3C;
+            color: white;
+        }
+
+        .close-btn:hover {
+            background: #C0392B;
+            transform: scale(1.1);
+        }
+
+        .drag-handle {
+            background: #27AE60;
+            color: white;
+            cursor: move;
+        }
+
+        .drag-handle:hover {
+            background: #229954;
+            transform: scale(1.1);
+        }
+
+        /* Dialog */
+        .dialog {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 8px;
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            border: 2px solid #2C3E50;
+            display: none;
+            min-width: 120px;
+            cursor: default;
+        }
+
+        .dialog.show {
+            display: block;
+        }
+
+        .dialog-text {
+            font-size: 11px;
+            color: #2C3E50;
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .dialog-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .dialog-btn {
+            padding: 4px 12px;
+            border: 2px solid #2C3E50;
+            border-radius: 6px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+        }
+
+        .yes-btn {
+            background: #27AE60;
+            color: white;
+        }
+
+        .yes-btn:hover {
+            background: #229954;
+        }
+
+        .no-btn {
+            background: #E74C3C;
+            color: white;
+        }
+
+        .no-btn:hover {
+            background: #C0392B;
+        }
+
+        /* Countdown styles */
+        .countdown-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #E74C3C;
+        }
+
+        /* Reset Button - PERFECTLY POSITIONED */
+        .reset-button {
+            position: fixed;
+            bottom: 120px;
+            right: 47px;
+            width: 18px;
+            height: 18px;
+            background: #3498DB;
+            border: 1px solid #2C3E50;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 1999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            animation: resetFloat 2.5s ease-in-out infinite;
+        }
+
+        .reset-button:hover {
+            background: #2C3E50;
+        }
+
+        .reset-button:active {
+            background: #E67E22;
+        }
+
+        /* Bokki Instruction Image with WAVY underwater effect - BEHIND SEAWEED */
+        .bokki-instruction {
+            position: fixed;
+            bottom: 5px;
+            right: 30px;
+            width: 120px;
+            height: 120px;
+            background-image: url('bokkireset.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 1995;
+            pointer-events: none;
+            opacity: 0.9;
+            animation: bokkiFloat 3s ease-in-out infinite, bokkiWave 4s ease-in-out infinite;
+            filter: url(#underwater-distortion);
+        }
+
+        /* Seaweed elements - IN FRONT OF BOKKI */
+        .seaweed {
+            position: fixed;
+            bottom: 0;
+            width: 8px;
+            background: linear-gradient(to top, #2d5e3e, #4a7c59, #6ba46a);
+            border-radius: 4px 4px 0 0;
+            transform-origin: bottom center;
+            z-index: 1998;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .seaweed-1 {
+            right: 15px;
+            height: 105px;
+            animation: seaweedSway 3.5s ease-in-out infinite;
+        }
+
+        .seaweed-2 {
+            right: 35px;
+            height: 90px;
+            animation: seaweedSway 4.2s ease-in-out infinite 0.5s;
+        }
+
+        .seaweed-3 {
+            right: 55px;
+            height: 85px;
+            animation: seaweedSway 3.8s ease-in-out infinite 1s;
+        }
+
+        .seaweed-4 {
+            right: 95px;
+            height: 95px;
+            animation: seaweedSway 4.5s ease-in-out infinite 1.5s;
+        }
+
+        .seaweed-5 {
+            right: 115px;
+            height: 100px;
+            animation: seaweedSway 3.2s ease-in-out infinite 0.8s;
+        }
+
+        .seaweed-6 {
+            right: 135px;
+            height: 80px;
+            animation: seaweedSway 3.9s ease-in-out infinite 2s;
+        }
+
+        /* Underwater Effect Canvas - COVERING SEAFLOOR AREA */
+        .underwater-effect {
+            position: fixed;
+            bottom: 5px;
+            right: 30px;
+            width: 120px;
+            height: 120px;
+            z-index: 1999;
+            pointer-events: none;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        @keyframes bokkiFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+        }
+
+        @keyframes bokkiWave {
+            0%, 100% { 
+                transform: translateY(0px) skew(0deg, 0deg);
+                filter: hue-rotate(0deg);
+            }
+            25% { 
+                transform: translateY(-1px) skew(1deg, 0.5deg);
+                filter: hue-rotate(5deg);
+            }
+            50% { 
+                transform: translateY(-3px) skew(0deg, 1deg);
+                filter: hue-rotate(0deg);
+            }
+            75% { 
+                transform: translateY(-2px) skew(-1deg, 0.5deg);
+                filter: hue-rotate(-5deg);
+            }
+        }
+
+        @keyframes seaweedSway {
+            0%, 100% { 
+                transform: rotate(0deg) scaleX(1);
+            }
+            25% { 
+                transform: rotate(3deg) scaleX(0.95);
+            }
+            50% { 
+                transform: rotate(-2deg) scaleX(1.05);
+            }
+            75% { 
+                transform: rotate(4deg) scaleX(0.98);
+            }
+        }
+
+        @keyframes resetFloat {
+            0%, 100% { 
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% { 
+                transform: translateY(-2px) rotate(5deg);
+            }
+        }
+
+        /* Director Set Image - Bottom Left */
+        .director-set {
+            position: fixed;
+            bottom: 0px;
+            left: 0px;
+            width: 180px;
+            height: auto;
+            z-index: 1995;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        /* Director Smoke Canvas */
+        .director-smoke {
+            position: fixed;
+            bottom: -30px;
+            left: 0px;
+            width: 1600px;
+            height: 120px;
+            z-index: -1;
+            pointer-events: none;
+            clip-path: polygon(0% 80%, 0% 0%, 20% 0%, 170% 200%);
+            mix-blend-mode: normal;
+            isolation: isolate;
+        }
+
+        /* Webcam Settings Widget */
+        .webcam-settings-widget {
+            width: 220px;
+            height: 320px;
+            position: fixed;
+            left: 75%;
+            top: 20%;
+            transform: translateX(-50%);
+            cursor: move;
+            user-select: none;
+            z-index: 997;
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 2px solid #2C3E50;
+            opacity: 0;
+            transform: translateX(-50%) scale(0.6) rotate(-15deg);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .webcam-settings-widget.ready {
+            opacity: 1;
+            transform: translateX(-50%) scale(1) rotate(0deg);
+        }
+
+        .webcam-settings-widget.show {
+            display: block;
+        }
+        
+        /* Always show webcam widgets initially for smooth fade-in */
+        .webcam-settings-widget.ready {
+            display: block;
+        }
+
+        .webcam-settings-bandaid {
+            position: absolute;
+            top: -5px;
+            left: 10px;
+            width: 35px;
+            height: 15px;
+            background: #F4D03F;
+            border-radius: 8px;
+            border: 2px solid #2C3E50;
+            transform: rotate(-15deg);
+            transition: all 0.3s ease;
+            cursor: move;
+            z-index: 1010;
+            pointer-events: auto;
+        }
+
+        .webcam-settings-bandaid:hover.can-animate {
+            transform: rotate(-15deg) scale(2.5);
+            animation: webcamSettingsWiggle 0.8s ease-out;
+        }
+
+        .webcam-settings-bandaid:hover:not(.can-animate) {
+            transform: rotate(-15deg) scale(2.5);
+        }
+
+        @keyframes webcamSettingsWiggle {
+            0% { transform: rotate(-15deg) scale(1); }
+            30% { transform: rotate(-18deg) scale(2.2); }
+            70% { transform: rotate(-12deg) scale(2.3); }
+            100% { transform: rotate(-15deg) scale(2.5); }
+        }
+
+        .webcam-settings-bandaid::before,
+        .webcam-settings-bandaid::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #E67E22;
+            border-radius: 50%;
+        }
+
+        .webcam-settings-bandaid::before {
+            top: 3px;
+            left: 6px;
+            box-shadow: 8px 0 0 #E67E22, 16px 0 0 #E67E22;
+        }
+
+        .webcam-settings-bandaid::after {
+            bottom: 3px;
+            left: 6px;
+            box-shadow: 8px 0 0 #E67E22, 16px 0 0 #E67E22;
+        }
+
+        .webcam-settings-header {
+            text-align: center;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #ECF0F1;
+        }
+
+        .webcam-settings-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #4a5d4a;
+            margin-bottom: 2px;
+        }
+
+        .webcam-settings-subtitle {
+            font-size: 9px;
+            color: #7F8C8D;
+        }
+
+        .webcam-settings-section {
+            margin-bottom: 12px;
+        }
+
+        .webcam-settings-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #2C3E50;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+
+        .webcam-toggle-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+            margin-bottom: 8px;
+        }
+
+        .webcam-toggle-track {
+            width: 40px;
+            height: 20px;
+            background: #ECF0F1;
+            border-radius: 10px;
+            border: 1px solid #BDC3C7;
+            position: relative;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .webcam-toggle-track:hover {
+            border-color: #2C3E50;
+        }
+
+        .webcam-toggle-thumb {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: #3498DB;
+            border-radius: 50%;
+            border: 1px solid #2C3E50;
+            left: 2px;
+            top: 2px;
+            transition: left 0.3s ease;
+        }
+
+        .webcam-toggle-switch.active .webcam-toggle-thumb {
+            left: 22px;
+            background: #E67E22;
+        }
+
+        .webcam-toggle-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: #7F8C8D;
+            transition: color 0.2s ease;
+            flex: 1;
+            text-align: center;
+        }
+
+        .webcam-toggle-label.left {
+            text-align: left;
+        }
+
+        .webcam-toggle-label.right {
+            text-align: right;
+        }
+
+        .webcam-toggle-switch:not(.active) .webcam-toggle-label.left {
+            color: #2C3E50;
+            font-weight: 700;
+        }
+
+        .webcam-toggle-switch.active .webcam-toggle-label.right {
+            color: #2C3E50;
+            font-weight: 700;
+        }
+
+        .webcam-format-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .format-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 6px;
+            border: 2px solid #BDC3C7;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #F8F9FA;
+        }
+
+        .format-option:hover {
+            border-color: #2C3E50;
+            background: #ECF0F1;
+        }
+
+        .format-option.active {
+            border-color: #E67E22;
+            background: #FDF2E9;
+        }
+
+        .format-preview {
+            width: 24px;
+            height: 16px;
+            background: #7BC3D1;
+            border: 1px solid #2C3E50;
+            margin-bottom: 4px;
+        }
+
+        .format-preview.landscape {
+            border-radius: 3px;
+        }
+
+        .format-preview.portrait {
+            width: 16px;
+            height: 24px;
+            border-radius: 3px;
+        }
+
+        .format-preview.circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .format-preview.random {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(45deg, #7BC3D1 25%, #E67E22 25%, #E67E22 50%, #7BC3D1 50%, #7BC3D1 75%, #E67E22 75%);
+            border: 1px solid #2C3E50;
+            border-radius: 3px;
+            animation: randomPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes randomPulse {
+            0%, 100% { 
+                transform: scale(1) rotate(0deg);
+                border-radius: 3px;
+            }
+            25% { 
+                transform: scale(1.1) rotate(45deg);
+                border-radius: 50%;
+            }
+            50% { 
+                transform: scale(0.9) rotate(90deg);
+                border-radius: 0px;
+            }
+            75% { 
+                transform: scale(1.05) rotate(135deg);
+                border-radius: 20%;
+            }
+        }
+
+        .format-option span {
+            font-size: 8px;
+            font-weight: bold;
+            color: #2C3E50;
+        }
+
+        /* Webcam Video Widget */
+        .webcam-video-widget {
+            width: 140px;
+            height: 110px;
+            position: fixed;
+            left: 20%;
+            top: 30%;
+            transform: translateX(-50%);
+            cursor: move;
+            user-select: none;
+            z-index: 999;
+            display: none;
+            opacity: 0;
+            transform: translateX(-50%) scale(0.5) rotate(18deg);
+            transition: all 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .webcam-video-widget.ready {
+            opacity: 1;
+            transform: translateX(-50%) scale(1) rotate(0deg);
+        }
+
+        .webcam-video-widget.show {
+            display: block;
+        }
+        
+        /* Always show webcam video widget initially for smooth fade-in */
+        .webcam-video-widget.ready {
+            display: block;
+        }
+
+        .webcam-container {
+            width: 140px;
+            height: 85px;
+            background: #7BC3D1;
+            border: 4px solid #2C3E50;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            transition: width 0.3s ease, height 0.3s ease, border-radius 0.3s ease;
+        }
+
+        /* Format-specific container styles */
+        .webcam-container.format-16-9 {
+            width: 140px;
+            height: 85px;
+            border-radius: 12px;
+            clip-path: none;
+        }
+
+        .webcam-container.format-9-16 {
+            width: 85px;
+            height: 140px;
+            border-radius: 12px;
+            clip-path: none;
+        }
+
+        .webcam-container.format-round {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            clip-path: none;
+        }
+
+        /* Random format styles - will be applied dynamically */
+        .webcam-container.format-random {
+            transition: all 0.5s ease;
+        }
+
+        .webcam-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: inherit;
+        }
+
+        .webcam-video-bandaid {
+            position: absolute;
+            top: -5px;
+            right: 10px;
+            width: 35px;
+            height: 15px;
+            background: #F4D03F;
+            border-radius: 8px;
+            border: 2px solid #2C3E50;
+            transform: rotate(15deg);
+            transition: all 0.3s ease;
+            cursor: move;
+            z-index: 1010;
+            pointer-events: auto;
+        }
+
+        .webcam-video-bandaid:hover.can-animate {
+            transform: rotate(15deg) scale(2.5);
+            animation: webcamVideoWiggle 0.8s ease-out;
+        }
+
+        .webcam-video-bandaid:hover:not(.can-animate) {
+            transform: rotate(15deg) scale(2.5);
+        }
+
+        @keyframes webcamVideoWiggle {
+            0% { transform: rotate(15deg) scale(1); }
+            30% { transform: rotate(18deg) scale(2.2); }
+            70% { transform: rotate(12deg) scale(2.3); }
+            100% { transform: rotate(15deg) scale(2.5); }
+        }
+
+        .webcam-video-bandaid::before,
+        .webcam-video-bandaid::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #E67E22;
+            border-radius: 50%;
+        }
+
+        .webcam-video-bandaid::before {
+            top: 3px;
+            left: 6px;
+            box-shadow: 8px 0 0 #E67E22, 16px 0 0 #E67E22;
+        }
+
+        .webcam-video-bandaid::after {
+            bottom: 3px;
+            left: 6px;
+            box-shadow: 8px 0 0 #E67E22, 16px 0 0 #E67E22;
+        }
+
+        /* AAS - Audio Settings Widget */
+        .audio-settings-widget {
+            width: 220px;
+            height: 350px;
+            position: fixed;
+            left: 25%;
+            top: 20%;
+            transform: translateX(-50%);
+            cursor: move;
+            user-select: none;
+            z-index: 995;
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 2px solid #2C3E50;
+            opacity: 0;
+            transform: translateX(-50%) scale(0.6) rotate(-12deg);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .audio-settings-widget.ready {
+            opacity: 1;
+            transform: translateX(-50%) scale(1) rotate(0deg);
+        }
+
+        .audio-settings-widget.show {
+            display: block;
+        }
+
+        .audio-settings-bandaid {
+            position: absolute;
+            top: -5px;
+            left: 10px;
+            width: 35px;
+            height: 15px;
+            background: #E67E22;
+            border-radius: 8px;
+            border: 2px solid #2C3E50;
+            transform: rotate(-15deg);
+            transition: all 0.3s ease;
+            cursor: move;
+            z-index: 1010;
+            pointer-events: auto;
+        }
+
+        .audio-settings-bandaid:hover.can-animate {
+            transform: rotate(-15deg) scale(2.5);
+            animation: audioSettingsWiggle 0.8s ease-out;
+        }
+
+        .audio-settings-bandaid:hover:not(.can-animate) {
+            transform: rotate(-15deg) scale(2.5);
+        }
+
+        @keyframes audioSettingsWiggle {
+            0% { transform: rotate(-15deg) scale(1); }
+            30% { transform: rotate(-18deg) scale(2.2); }
+            70% { transform: rotate(-12deg) scale(2.3); }
+            100% { transform: rotate(-15deg) scale(2.5); }
+        }
+
+        .audio-settings-bandaid::before,
+        .audio-settings-bandaid::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #2C3E50;
+            border-radius: 50%;
+        }
+
+        .audio-settings-bandaid::before {
+            top: 3px;
+            left: 6px;
+            box-shadow: 8px 0 0 #2C3E50, 16px 0 0 #2C3E50;
+        }
+
+        .audio-settings-bandaid::after {
+            bottom: 3px;
+            left: 6px;
+            box-shadow: 8px 0 0 #2C3E50, 16px 0 0 #2C3E50;
+        }
+
+        .audio-settings-header {
+            text-align: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #ECF0F1;
+        }
+
+        .audio-settings-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #4a5d4a;
+            margin-bottom: 2px;
+        }
+
+        .audio-settings-subtitle {
+            font-size: 9px;
+            color: #7F8C8D;
+        }
+
+        .audio-settings-section {
+            margin-bottom: 14px;
+        }
+
+        .audio-settings-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #2C3E50;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        /* Audio Source Selector */
+        .audio-source-selector {
+            display: flex;
+            gap: 4px;
+            justify-content: space-between;
+        }
+
+        .source-option {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 4px;
+            border: 2px solid #BDC3C7;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #F8F9FA;
+        }
+
+        .source-option:hover {
+            border-color: #E67E22;
+            background: #FDF2E9;
+        }
+
+        .source-option.active {
+            border-color: #E67E22;
+            background: #FDF2E9;
+            box-shadow: 0 2px 4px rgba(230, 126, 34, 0.2);
+        }
+
+        .source-icon {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .source-option span {
+            font-size: 8px;
+            font-weight: bold;
+            color: #2C3E50;
+        }
+
+        /* Audio Slider */
+        .audio-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .audio-slider {
+            flex: 1;
+            height: 6px;
+            background: #ECF0F1;
+            border-radius: 3px;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .audio-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #E67E22;
+            border-radius: 50%;
+            border: 2px solid #2C3E50;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .audio-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider-value {
+            font-size: 10px;
+            font-weight: bold;
+            color: #2C3E50;
+            min-width: 35px;
+            text-align: center;
+        }
+
+        /* Audio Toggle */
+        .audio-toggle-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+        }
+
+        .audio-toggle-track {
+            width: 40px;
+            height: 20px;
+            background: #ECF0F1;
+            border-radius: 10px;
+            border: 1px solid #BDC3C7;
+            position: relative;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .audio-toggle-track:hover {
+            border-color: #E67E22;
+        }
+
+        .audio-toggle-thumb {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: #3498DB;
+            border-radius: 50%;
+            border: 1px solid #2C3E50;
+            left: 2px;
+            top: 2px;
+            transition: left 0.3s ease;
+        }
+
+        .audio-toggle-switch.active .audio-toggle-thumb {
+            left: 22px;
+            background: #E67E22;
+        }
+
+        .audio-toggle-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: #7F8C8D;
+            transition: color 0.2s ease;
+            flex: 1;
+            text-align: center;
+        }
+
+        .audio-toggle-label.left {
+            text-align: left;
+        }
+
+        .audio-toggle-label.right {
+            text-align: right;
+        }
+
+        .audio-toggle-switch:not(.active) .audio-toggle-label.left {
+            color: #2C3E50;
+            font-weight: 700;
+        }
+
+        .audio-toggle-switch.active .audio-toggle-label.right {
+            color: #2C3E50;
+            font-weight: 700;
+        }
+
+        /* Audio Meters */
+        .audio-meter-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .audio-meter {
+            width: 100%;
+            height: 12px;
+            background: #ECF0F1;
+            border: 1px solid #BDC3C7;
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .meter-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #27AE60 0%, #F1C40F 70%, #E74C3C 90%);
+            transition: width 0.05s ease-out;
+            border-radius: 5px;
+        }
+
+        .meter-labels {
+            text-align: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: #2C3E50;
+        }
+
+        /* Copyright under Bokki */
+        .copyright {
+            position: fixed;
+            bottom: 15px;
+            right: 49px;
+            font-size: 10px;
+            color: #9b7619;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-weight: 500;
+            z-index: 2000;
+            pointer-events: none;
+            opacity: 0.7;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <!-- AVS Widget -->
+    <div class="config-container" id="avsWidget">
+        <div class="avs-bandaid" id="avsBandaid"></div>
+        <div class="config-header">
+            <div class="config-title">MAIN CONTROL</div>
+            <div class="config-subtitle">Configure Recording Setup</div>
+        </div>
+
+        <div class="config-section">
+            <label class="config-label">Video Recording</label>
+            <div class="toggle-switch" id="videoToggle">
+                <span class="toggle-label left">OFF</span>
+                <div class="toggle-track">
+                    <div class="toggle-thumb"></div>
+                </div>
+                <span class="toggle-label right">ON</span>
+            </div>
+        </div>
+
+        <div class="config-section video-settings" id="videoSettings" style="display: none;">
+            <label class="config-label">Quality</label>
+            <div class="toggle-switch" id="qualityToggle">
+                <span class="toggle-label left">1080p</span>
+                <div class="toggle-track">
+                    <div class="toggle-thumb"></div>
+                </div>
+                <span class="toggle-label right">4K</span>
+            </div>
+        </div>
+
+        <div class="config-section video-settings" id="startModeSection" style="display: none;">
+            <label class="config-label">Start Mode</label>
+            <div class="toggle-switch" id="startModeToggle">
+                <span class="toggle-label left">Countdown</span>
+                <div class="toggle-track">
+                    <div class="toggle-thumb"></div>
+                </div>
+                <span class="toggle-label right">Go Time</span>
+            </div>
+        </div>
+
+        <div class="config-section video-settings" id="webcamSection" style="display: none;">
+            <label class="config-label">Webcam</label>
+            <div class="toggle-switch" id="webcamToggle">
+                <span class="toggle-label left">OFF</span>
+                <div class="toggle-track">
+                    <div class="toggle-thumb"></div>
+                </div>
+                <span class="toggle-label right">ON</span>
+            </div>
+        </div>
+
+        <div class="config-section">
+            <label class="config-label">Audio Recording</label>
+            <div class="toggle-switch" id="audioToggle">
+                <span class="toggle-label left">OFF</span>
+                <div class="toggle-track">
+                    <div class="toggle-thumb"></div>
+                </div>
+                <span class="toggle-label right">ON</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copat Widget -->
+    <div class="copat-widget" id="widget">
+        <div class="controls">
+        </div>
+        
+        <div class="copat-head" id="copatHead">
+            <div class="copat-eyes">
+                <div class="eye" id="leftEye"></div>
+                <div class="eye" id="rightEye"></div>
+            </div>
+            <div class="copat-mouth"></div>
+            <div class="bandaid" id="bandaid"></div>
+        </div>
+
+        <div class="copat-body" id="copatBody">
+            <span id="displayText">READY</span>
+        </div>
+
+        <div class="dialog" id="dialog">
+            <div class="dialog-text">Save Recording?</div>
+            <div class="dialog-buttons">
+                <button class="dialog-btn yes-btn" onclick="saveVideo()">YES</button>
+                <button class="dialog-btn no-btn" onclick="discardVideo()">NO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Button -->
+    <button class="reset-button" onclick="resetWidgetPositions()">↺</button>
+    
+    <!-- Bokki Instruction -->
+    <div class="bokki-instruction"></div>
+    
+    <!-- Seaweed forest around Bokki -->
+    <div class="seaweed seaweed-1"></div>
+    <div class="seaweed seaweed-2"></div>
+    <div class="seaweed seaweed-3"></div>
+    <div class="seaweed seaweed-4"></div>
+    <div class="seaweed seaweed-5"></div>
+    <div class="seaweed seaweed-6"></div>
+    
+    <!-- Director Smoke Effect -->
+    <canvas class="director-smoke" id="directorSmokeCanvas"></canvas>
+    
+    <!-- Director Set Image -->
+    <img src="set.png" alt="Director Set" class="director-set">
+    
+    <!-- Webcam Settings Widget -->
+    <div class="webcam-settings-widget" id="webcamSettingsWidget">
+        <div class="webcam-settings-bandaid" id="webcamSettingsBandaid"></div>
+        <div class="webcam-settings-header">
+            <div class="webcam-settings-title">AWS</div>
+            <div class="webcam-settings-subtitle">Area for Webcam Settings</div>
+        </div>
+        
+        <div class="webcam-settings-section">
+            <label class="webcam-settings-label">Size</label>
+            <div class="webcam-toggle-switch" id="webcamSizeToggle">
+                <span class="webcam-toggle-label left">Small</span>
+                <div class="webcam-toggle-track">
+                    <div class="webcam-toggle-thumb"></div>
+                </div>
+                <span class="webcam-toggle-label right">Big</span>
+            </div>
+        </div>
+
+        <div class="webcam-settings-section">
+            <label class="webcam-settings-label">Zoom</label>
+            <div class="webcam-toggle-switch" id="webcamZoomToggle">
+                <span class="webcam-toggle-label left">Normal</span>
+                <div class="webcam-toggle-track">
+                    <div class="webcam-toggle-thumb"></div>
+                </div>
+                <span class="webcam-toggle-label right">Zoom</span>
+            </div>
+        </div>
+
+        <div class="webcam-settings-section">
+            <label class="webcam-settings-label">Float</label>
+            <div class="webcam-toggle-switch" id="webcamFloatToggle">
+                <span class="webcam-toggle-label left">Normal</span>
+                <div class="webcam-toggle-track">
+                    <div class="webcam-toggle-thumb"></div>
+                </div>
+                <span class="webcam-toggle-label right">PiP</span>
+            </div>
+        </div>
+
+        <div class="webcam-settings-section">
+            <label class="webcam-settings-label">Format</label>
+        </div>
+        
+        <div class="webcam-format-selector">
+            <div class="format-option active" data-format="16:9">
+                <div class="format-preview landscape"></div>
+                <span>16:9</span>
+            </div>
+            <div class="format-option" data-format="9:16">
+                <div class="format-preview portrait"></div>
+                <span>9:16</span>
+            </div>
+            <div class="format-option" data-format="round">
+                <div class="format-preview circle"></div>
+                <span>Round</span>
+            </div>
+            <div class="format-option" data-format="random">
+                <div class="format-preview random"></div>
+                <span>Random</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Webcam Video Widget -->
+    <div class="webcam-video-widget" id="webcamVideoWidget">
+        <div class="webcam-video-bandaid" id="webcamVideoBandaid"></div>
+        <div class="webcam-container" id="webcamContainer">
+            <video class="webcam-video" id="webcamVideo" autoplay muted playsinline></video>
+        </div>
+    </div>
+
+    <!-- AAS - Area for Audio Settings -->
+    <div class="audio-settings-widget" id="audioSettingsWidget">
+        <div class="audio-settings-bandaid" id="audioSettingsBandaid"></div>
+        <div class="audio-settings-header">
+            <div class="audio-settings-title">AAS</div>
+            <div class="audio-settings-subtitle">Area for Audio Settings</div>
+        </div>
+        
+        <div class="audio-settings-section">
+            <label class="audio-settings-label">Input Source</label>
+            <div class="audio-source-selector">
+                <div class="source-option active" data-source="microphone">
+                    <div class="source-icon mic-icon">🎤</div>
+                    <span>Mic</span>
+                </div>
+                <div class="source-option" data-source="system">
+                    <div class="source-icon system-icon">🔊</div>
+                    <span>System</span>
+                </div>
+                <div class="source-option" data-source="both">
+                    <div class="source-icon both-icon">🎧</div>
+                    <span>Both</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="audio-settings-section">
+            <label class="audio-settings-label">Gain</label>
+            <div class="audio-slider-container">
+                <input type="range" class="audio-slider" id="gainSlider" min="0" max="100" value="50">
+                <div class="slider-value" id="gainValue">50%</div>
+            </div>
+        </div>
+
+        <div class="audio-settings-section">
+            <label class="audio-settings-label">Noise Gate</label>
+            <div class="audio-toggle-switch" id="noiseGateToggle">
+                <span class="audio-toggle-label left">OFF</span>
+                <div class="audio-toggle-track">
+                    <div class="audio-toggle-thumb"></div>
+                </div>
+                <span class="audio-toggle-label right">ON</span>
+            </div>
+        </div>
+
+        <div class="audio-settings-section">
+            <label class="audio-settings-label">Audio Level</label>
+            <div class="audio-meter-container">
+                <div class="audio-meter" id="audioMeter">
+                    <div class="meter-fill" id="meterFill"></div>
+                </div>
+                <div class="meter-labels">
+                    <span>LEVEL</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copyright -->
+    <div class="copyright">94tch © 2025</div>
+    
+    <!-- SVG filter for underwater distortion -->
+    <svg style="position: absolute; width: 0; height: 0;">
+        <defs>
+            <filter id="underwater-distortion" x="0%" y="0%" width="100%" height="100%">
+                <feTurbulence baseFrequency="0.02 0.1" numOctaves="2" result="turbulence">
+                    <animate attributeName="baseFrequency" values="0.02 0.1;0.04 0.12;0.02 0.1" dur="6s" repeatCount="indefinite"/>
+                </feTurbulence>
+                <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="1.5"/>
+            </filter>
+        </defs>
+    </svg>
+    
+    <!-- Underwater Effect -->
+    <canvas class="underwater-effect" id="underwaterCanvas"></canvas>
+    
+    <!-- Underwater Effect -->
+    <canvas class="underwater-effect" id="underwaterCanvas"></canvas>
+    
+    <!-- Underwater Effect -->
+    <canvas class="underwater-effect" id="underwaterCanvas"></canvas>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let state = 'idle';
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let startTime = null;
+        let timerInterval = null;
+        let countdownInterval = null;
+        let ffmpeg = null;
+        let isFFmpegLoaded = false;
+
+        const widget = document.getElementById('widget');
+        const copatHead = document.getElementById('copatHead');
+        const copatBody = document.getElementById('copatBody');
+        const bandaid = document.getElementById('bandaid');
+        const displayText = document.getElementById('displayText');
+        const dialog = document.getElementById('dialog');
+        const leftEye = document.getElementById('leftEye');
+        const rightEye = document.getElementById('rightEye');
+
+        // Drag functionality for both widgets
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+        let dragTarget = null;
+        let justFinishedDragging = false;
+        let mouseHasLeft = { copat: true, avs: true, webcamSettings: true, webcamVideo: true, audioSettings: true };
+
+        // Copat widget drag - body and bandaid
+        copatBody.addEventListener('mousedown', (e) => startDrag(e, 'copat'));
+        bandaid.addEventListener('mousedown', (e) => startDrag(e, 'copat'));
+        
+        // Static menu is not draggable - no drag handlers needed
+        
+        // Webcam widgets drag
+        const webcamSettingsBandaid = document.getElementById('webcamSettingsBandaid');
+        webcamSettingsBandaid.addEventListener('mousedown', (e) => startDrag(e, 'webcamSettings'));
+        
+        const webcamVideoBandaid = document.getElementById('webcamVideoBandaid');
+        webcamVideoBandaid.addEventListener('mousedown', (e) => startDrag(e, 'webcamVideo'));
+        
+        // Audio widget drag
+        const audioSettingsBandaid = document.getElementById('audioSettingsBandaid');
+        audioSettingsBandaid.addEventListener('mousedown', (e) => startDrag(e, 'audioSettings'));
+        
+        // Track mouse enter/leave for animations and head hover control
+        let isOverBandaid = false;
+        
+        bandaid.addEventListener('mouseenter', (e) => {
+            isOverBandaid = true;
+            copatHead.classList.remove('head-hover');
+            if (mouseHasLeft.copat) {
+                bandaid.classList.add('can-animate');
+            }
+        });
+        
+        bandaid.addEventListener('mouseleave', () => {
+            isOverBandaid = false;
+            mouseHasLeft.copat = true;
+            bandaid.classList.remove('can-animate');
+        });
+        
+        copatHead.addEventListener('mouseenter', () => {
+            if (!isOverBandaid) {
+                copatHead.classList.add('head-hover');
+            }
+        });
+        
+        copatHead.addEventListener('mouseleave', () => {
+            copatHead.classList.remove('head-hover');
+        });
+        
+        webcamSettingsBandaid.addEventListener('mouseenter', () => {
+            if (mouseHasLeft.webcamSettings) {
+                webcamSettingsBandaid.classList.add('can-animate');
+            }
+        });
+        
+        webcamSettingsBandaid.addEventListener('mouseleave', () => {
+            mouseHasLeft.webcamSettings = true;
+            webcamSettingsBandaid.classList.remove('can-animate');
+        });
+        
+        webcamVideoBandaid.addEventListener('mouseenter', () => {
+            if (mouseHasLeft.webcamVideo) {
+                webcamVideoBandaid.classList.add('can-animate');
+            }
+        });
+        
+        webcamVideoBandaid.addEventListener('mouseleave', () => {
+            mouseHasLeft.webcamVideo = true;
+            webcamVideoBandaid.classList.remove('can-animate');
+        });
+        
+        // Static menu has no bandaid animations
+        
+        audioSettingsBandaid.addEventListener('mouseenter', () => {
+            if (mouseHasLeft.audioSettings) {
+                audioSettingsBandaid.classList.add('can-animate');
+            }
+        });
+        
+        audioSettingsBandaid.addEventListener('mouseleave', () => {
+            mouseHasLeft.audioSettings = true;
+            audioSettingsBandaid.classList.remove('can-animate');
+        });
+        
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDrag);
+
+        function startDrag(e, type) {
+            e.preventDefault();
+            e.stopPropagation();
+            isDragging = true;
+            dragTarget = type;
+            
+            let targetWidget;
+            if (type === 'copat') {
+                targetWidget = widget;
+            } else if (type === 'avs') {
+                targetWidget = document.getElementById('avsWidget');
+            } else if (type === 'webcamSettings') {
+                targetWidget = document.getElementById('webcamSettingsWidget');
+            } else if (type === 'webcamVideo') {
+                targetWidget = document.getElementById('webcamVideoWidget');
+            } else if (type === 'audioSettings') {
+                targetWidget = document.getElementById('audioSettingsWidget');
+            }
+            
+            const rect = targetWidget.getBoundingClientRect();
+            
+            // Calculate offset from where we actually clicked for both widgets
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+            
+            // Clear transform before setting position to avoid jump for all widgets
+            if (type === 'avs' || type === 'copat' || type === 'webcamSettings' || type === 'webcamVideo' || type === 'audioSettings') {
+                targetWidget.style.transform = 'none';
+                targetWidget.style.left = rect.left + 'px';
+                targetWidget.style.top = rect.top + 'px';
+            }
+            
+            targetWidget.style.position = 'fixed';
+            targetWidget.style.zIndex = '9999';
+        }
+
+        function drag(e) {
+            if (!isDragging || !dragTarget) return;
+            e.preventDefault();
+            
+            let targetWidget;
+            if (dragTarget === 'copat') {
+                targetWidget = widget;
+            } else if (dragTarget === 'avs') {
+                targetWidget = document.getElementById('avsWidget');
+            } else if (dragTarget === 'webcamSettings') {
+                targetWidget = document.getElementById('webcamSettingsWidget');
+            } else if (dragTarget === 'webcamVideo') {
+                targetWidget = document.getElementById('webcamVideoWidget');
+            } else if (dragTarget === 'audioSettings') {
+                targetWidget = document.getElementById('audioSettingsWidget');
+            }
+            
+            const newLeft = (e.clientX - dragOffset.x) + 'px';
+            const newTop = (e.clientY - dragOffset.y) + 'px';
+            targetWidget.style.left = newLeft;
+            targetWidget.style.top = newTop;
+        }
+
+        function stopDrag() {
+            const wasDragging = isDragging;
+            
+            if (isDragging && dragTarget) {
+                let targetWidget;
+                if (dragTarget === 'copat') {
+                    targetWidget = widget;
+                } else if (dragTarget === 'avs') {
+                    targetWidget = document.getElementById('avsWidget');
+                } else if (dragTarget === 'webcamSettings') {
+                    targetWidget = document.getElementById('webcamSettingsWidget');
+                } else if (dragTarget === 'webcamVideo') {
+                    targetWidget = document.getElementById('webcamVideoWidget');
+                } else if (dragTarget === 'audioSettings') {
+                    targetWidget = document.getElementById('audioSettingsWidget');
+                }
+                
+                if (targetWidget) {
+                    // Reset z-index for all widgets
+                    targetWidget.style.zIndex = '';
+                    
+                    // Save position to localStorage
+                    const position = {
+                        left: targetWidget.style.left,
+                        top: targetWidget.style.top
+                    };
+                    const storageKey = dragTarget === 'copat' ? 'copatPosition' : 
+                                     dragTarget === 'avs' ? 'avsPosition' : 
+                                     dragTarget === 'webcamSettings' ? 'webcamSettingsPosition' :
+                                     dragTarget === 'webcamVideo' ? 'webcamVideoPosition' :
+                                     'audioSettingsPosition';
+                    localStorage.setItem(storageKey, JSON.stringify(position));
+                    
+                    // Set flag to prevent immediate click
+                    justFinishedDragging = true;
+                    setTimeout(() => {
+                        justFinishedDragging = false;
+                    }, 100);
+                    
+                    // Mark that mouse hasn't left after drag
+                    mouseHasLeft[dragTarget] = false;
+                }
+            }
+            isDragging = false;
+            dragTarget = null;
+        }
+
+        // Load saved positions on page load
+        function loadSavedPosition() {
+            // Load Copat position
+            const savedCopatPosition = localStorage.getItem('copatPosition');
+            if (savedCopatPosition) {
+                const position = JSON.parse(savedCopatPosition);
+                widget.style.left = position.left;
+                widget.style.top = position.top;
+                widget.style.transform = 'none';
+            }
+            
+            // Load AVS position
+            const savedAvsPosition = localStorage.getItem('avsPosition');
+            if (savedAvsPosition) {
+                const position = JSON.parse(savedAvsPosition);
+                const avsWidget = document.getElementById('avsWidget');
+                avsWidget.style.position = 'fixed';
+                avsWidget.style.left = position.left;
+                avsWidget.style.top = position.top;
+                avsWidget.style.transform = 'none';
+            }
+            
+            // Load Webcam Settings position
+            const savedWebcamSettingsPosition = localStorage.getItem('webcamSettingsPosition');
+            if (savedWebcamSettingsPosition) {
+                const position = JSON.parse(savedWebcamSettingsPosition);
+                const webcamSettingsWidget = document.getElementById('webcamSettingsWidget');
+                webcamSettingsWidget.style.position = 'fixed';
+                webcamSettingsWidget.style.left = position.left;
+                webcamSettingsWidget.style.top = position.top;
+                webcamSettingsWidget.style.transform = 'none';
+            }
+            
+            // Load Webcam Video position
+            const savedWebcamVideoPosition = localStorage.getItem('webcamVideoPosition');
+            if (savedWebcamVideoPosition) {
+                const position = JSON.parse(savedWebcamVideoPosition);
+                const webcamVideoWidget = document.getElementById('webcamVideoWidget');
+                webcamVideoWidget.style.position = 'fixed';
+                webcamVideoWidget.style.left = position.left;
+                webcamVideoWidget.style.top = position.top;
+                webcamVideoWidget.style.transform = 'none';
+            }
+            
+            // Load Audio Settings position
+            const savedAudioSettingsPosition = localStorage.getItem('audioSettingsPosition');
+            if (savedAudioSettingsPosition) {
+                const position = JSON.parse(savedAudioSettingsPosition);
+                const audioSettingsWidget = document.getElementById('audioSettingsWidget');
+                audioSettingsWidget.style.position = 'fixed';
+                audioSettingsWidget.style.left = position.left;
+                audioSettingsWidget.style.top = position.top;
+                audioSettingsWidget.style.transform = 'none';
+            }
+        }
+
+        function closeApp() {
+            if (state === 'recording') {
+                stopRecording();
+            }
+            window.close();
+        }
+
+        async function handleMainButton() {
+            if (state === 'idle') {
+                const startMode = document.getElementById('startModeToggle').classList.contains('active') ? 'gotime' : 'countdown';
+                if (startMode === 'gotime') {
+                    startRecording();
+                } else {
+                    startCountdown();
+                }
+            } else if (state === 'countdown') {
+                cancelCountdown();
+            } else if (state === 'recording') {
+                stopRecording();
+            }
+        }
+
+        function startCountdown() {
+            state = 'countdown';
+            let count = 3;
+            
+            bandaid.classList.add('countdown');
+            displayText.className = 'countdown-text';
+            displayText.textContent = count;
+            copatHead.classList.add('countdown');
+            
+            countdownInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    displayText.textContent = count;
+                } else {
+                    clearInterval(countdownInterval);
+                    startRecording();
+                }
+            }, 1000);
+        }
+
+        function cancelCountdown() {
+            clearInterval(countdownInterval);
+            resetToIdle();
+        }
+
+        async function startRecording() {
+            console.log('startRecording called');
+            try {
+                const quality = document.getElementById('qualityToggle').classList.contains('active') ? '4k' : '1080p';
+                
+                const videoConstraints = {
+                    mediaSource: 'screen',
+                    displaySurface: 'monitor',
+                    cursor: 'never',
+                    frameRate: quality === '4k' ? 60 : 30
+                };
+                
+                if (quality === '4k') {
+                    videoConstraints.width = { ideal: 3840 };
+                    videoConstraints.height = { ideal: 2160 };
+                } else {
+                    videoConstraints.width = { ideal: 1920 };
+                    videoConstraints.height = { ideal: 1080 };
+                }
+                
+                const videoStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: videoConstraints,
+                    audio: false,
+                    autoSelectAllScreens: true,
+                    surfaceSwitching: 'exclude',
+                    selfBrowserSurface: 'exclude'
+                });
+                console.log('Video stream obtained:', videoStream);
+                
+                // Create combined stream with audio if active
+                let combinedStream = videoStream;
+                const audioToggle = document.getElementById('audioToggle');
+                
+                if (audioToggle.classList.contains('active') && audioStream) {
+                    console.log('Adding audio to recording...');
+                    
+                    // Create new MediaStream with video + audio tracks
+                    combinedStream = new MediaStream();
+                    
+                    // Add video tracks
+                    videoStream.getVideoTracks().forEach(track => {
+                        combinedStream.addTrack(track);
+                    });
+                    
+                    // Add audio tracks
+                    audioStream.getAudioTracks().forEach(track => {
+                        combinedStream.addTrack(track);
+                    });
+                    
+                    console.log('Combined stream created with video + audio');
+                } else {
+                    console.log('Recording video only');
+                }
+                
+                const stream = combinedStream;
+
+                // Check if we have audio and choose appropriate codec
+                const hasAudio = audioToggle.classList.contains('active') && audioStream;
+                let options = {};
+                
+                if (hasAudio) {
+                    // For audio + video, prefer VP9 or fallback to basic WebM
+                    if (MediaRecorder.isTypeSupported('video/webm; codecs="vp9,opus"')) {
+                        options = {
+                            mimeType: 'video/webm; codecs="vp9,opus"',
+                            videoBitsPerSecond: quality === '4k' ? 15000000 : 8000000,
+                            audioBitsPerSecond: 128000
+                        };
+                        console.log('Recording with VP9 + Opus codec');
+                    } else if (MediaRecorder.isTypeSupported('video/webm; codecs="vp8,opus"')) {
+                        options = {
+                            mimeType: 'video/webm; codecs="vp8,opus"',
+                            videoBitsPerSecond: quality === '4k' ? 12000000 : 6000000,
+                            audioBitsPerSecond: 128000
+                        };
+                        console.log('Recording with VP8 + Opus codec');
+                    } else if (MediaRecorder.isTypeSupported('video/webm')) {
+                        options = {
+                            mimeType: 'video/webm',
+                            videoBitsPerSecond: quality === '4k' ? 10000000 : 5000000,
+                            audioBitsPerSecond: 128000
+                        };
+                        console.log('Recording with default WebM + audio');
+                    } else {
+                        throw new Error('Browser does not support audio recording with WebM');
+                    }
+                } else {
+                    // Video only - use existing logic
+                    if (MediaRecorder.isTypeSupported('video/webm; codecs="vp9"')) {
+                        options = {
+                            mimeType: 'video/webm; codecs="vp9"',
+                            videoBitsPerSecond: quality === '4k' ? 15000000 : 8000000
+                        };
+                        console.log('Recording with VP9 codec (video only)');
+                    } else if (MediaRecorder.isTypeSupported('video/webm; codecs="vp8"')) {
+                        options = {
+                            mimeType: 'video/webm; codecs="vp8"',
+                            videoBitsPerSecond: quality === '4k' ? 12000000 : 6000000
+                        };
+                        console.log('Recording with VP8 codec (video only)');
+                    } else {
+                        options = {
+                            mimeType: 'video/webm',
+                            videoBitsPerSecond: quality === '4k' ? 10000000 : 5000000
+                        };
+                        console.log('Recording with default WebM (video only)');
+                    }
+                }
+
+                mediaRecorder = new MediaRecorder(stream, options);
+                console.log('MediaRecorder created with:', options.mimeType);
+
+                recordedChunks = [];
+                
+                mediaRecorder.addEventListener('dataavailable', event => {
+                    console.log('Data available:', event.data.size);
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                });
+
+                // Record in smaller chunks for better seeking
+                mediaRecorder.start(1000); // 1-second chunks
+                console.log('MediaRecorder started with 1s chunks');
+                
+                // Update Copat for recording
+                state = 'recording';
+                copatHead.classList.add('recording');
+                bandaid.classList.remove('countdown');
+                bandaid.classList.add('recording');
+                copatHead.classList.remove('countdown');
+                displayText.className = '';
+                displayText.textContent = '00:00';
+                
+                startTime = Date.now();
+                updateTimer();
+                timerInterval = setInterval(updateTimer, 1000);
+
+            } catch (err) {
+                console.error('Error starting recording:', err);
+                alert('Recording failed: ' + err.message);
+                resetToIdle();
+            }
+        }
+
+        function updateTimer() {
+            if (startTime) {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                displayText.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            }
+            
+            clearInterval(timerInterval);
+            
+            state = 'stopped';
+            copatHead.classList.remove('recording');
+            bandaid.classList.remove('recording');
+            displayText.textContent = 'DONE!';
+            
+            // Show save dialog
+            setTimeout(() => {
+                dialog.classList.add('show'); 
+            }, 500);
+        }
+
+        function saveVideo() {
+            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            
+            // Show progress animation
+            displayText.textContent = 'SAVING...';
+            copatBody.classList.remove('recording');
+            copatBody.classList.add('processing');
+            
+            // Create progress bar
+            const progressBar = document.createElement('div');
+            progressBar.className = 'progress-bar';
+            copatBody.appendChild(progressBar);
+            
+            // Animate progress bar
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15 + 5; // Random progress between 5-20%
+                if (progress > 95) {
+                    progress = 95;
+                    clearInterval(progressInterval);
+                    
+                    // Finish up
+                    setTimeout(() => {
+                        progress = 100;
+                        progressBar.style.width = progress + '%';
+                        displayText.textContent = 'FINALIZING...';
+                        
+                        setTimeout(() => {
+                            // Actually download the file
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `copatcher-recording-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.webm`;
+                            a.click();
+                            URL.revokeObjectURL(url);
+                            
+                            // Cleanup and reset
+                            displayText.textContent = 'SAVED!';
+                            setTimeout(() => {
+                                copatBody.classList.remove('processing');
+                                copatBody.removeChild(progressBar);
+                                dialog.classList.remove('show');
+                                resetToIdle();
+                            }, 1000);
+                        }, 800);
+                    }, 500);
+                }
+                progressBar.style.width = progress + '%';
+            }, 150);
+        }
+        
+        async function initFFmpeg() {
+            try {
+                // Check if browser supports MediaRecorder with MP4
+                if (MediaRecorder.isTypeSupported('video/mp4')) {
+                    console.log('Browser supports MP4 recording directly');
+                    isFFmpegLoaded = true;
+                } else {
+                    console.log('Browser only supports WebM, will use client-side conversion');
+                    isFFmpegLoaded = true; // We'll use our own conversion
+                }
+                
+                displayText.textContent = 'READY';
+                console.log('Video processing ready');
+            } catch (error) {
+                console.warn('Video processing setup failed:', error);
+                isFFmpegLoaded = false;
+                displayText.textContent = 'READY';
+            }
+        }
+        
+        async function convertToMP4(webmBlob) {
+            try {
+                displayText.textContent = 'OPTIMIZING...';
+                console.log('Creating optimized WebM with seeking support...');
+                
+                // Create an optimized WebM that supports seeking
+                const optimizedBlob = await createSeekableWebM(webmBlob);
+                
+                displayText.textContent = 'FINALIZING...';
+                setTimeout(() => {
+                    downloadFile(optimizedBlob, 'webm');
+                }, 500);
+                
+            } catch (error) {
+                console.error('WebM optimization failed:', error);
+                displayText.textContent = 'OPT FAILED';
+                
+                setTimeout(() => {
+                    alert('Optimization failed. Downloading original instead.');
+                    downloadFile(webmBlob, 'webm');
+                }, 1000);
+            }
+        }
+        
+        async function createSeekableWebM(webmBlob) {
+            return new Promise((resolve, reject) => {
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(webmBlob);
+                video.muted = true;
+                
+                video.onloadedmetadata = () => {
+                    console.log('Original duration:', video.duration);
+                    console.log('Original size:', video.videoWidth, 'x', video.videoHeight);
+                    
+                    // The key insight: create a new WebM with proper structure for seeking
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    
+                    const stream = canvas.captureStream(30);
+                    
+                    // Use high-quality WebM settings
+                    const options = {
+                        mimeType: 'video/webm; codecs="vp9"',
+                        videoBitsPerSecond: 10000000 // 10Mbps
+                    };
+                    
+                    // Fallback if VP9 not supported
+                    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                        options.mimeType = 'video/webm; codecs="vp8"';
+                        options.videoBitsPerSecond = 8000000;
+                    }
+                    
+                    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                        options.mimeType = 'video/webm';
+                        options.videoBitsPerSecond = 6000000;
+                    }
+                    
+                    console.log('Re-encoding with:', options.mimeType);
+                    
+                    const recorder = new MediaRecorder(stream, options);
+                    const chunks = [];
+                    
+                    recorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            chunks.push(event.data);
+                        }
+                    };
+                    
+                    recorder.onstop = () => {
+                        console.log('Seekable WebM created, chunks:', chunks.length);
+                        
+                        // Create blob with explicit WebM type for better seeking
+                        const seekableBlob = new Blob(chunks, { 
+                            type: 'video/webm' 
+                        });
+                        
+                        URL.revokeObjectURL(video.src);
+                        resolve(seekableBlob);
+                    };
+                    
+                    // Record in small chunks for better seeking structure
+                    recorder.start(500); // 0.5-second chunks
+                    
+                    // Play and capture with precise timing
+                    video.currentTime = 0;
+                    video.play();
+                    
+                    const captureFrames = () => {
+                        if (!video.ended && !video.paused) {
+                            ctx.drawImage(video, 0, 0);
+                            
+                            const progress = (video.currentTime / video.duration) * 100;
+                            displayText.textContent = `OPTIMIZING ${Math.round(progress)}%`;
+                            
+                            requestAnimationFrame(captureFrames);
+                        } else {
+                            recorder.stop();
+                        }
+                    };
+                    
+                    video.addEventListener('canplay', captureFrames);
+                };
+                
+                video.onerror = () => {
+                    reject(new Error('Could not process video'));
+                };
+            });
+        }
+        
+        function downloadFile(blob, format) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `copatcher-recording-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.${format}`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            // Update UI
+            displayText.textContent = 'SAVED!';
+            setTimeout(() => {
+                dialog.classList.remove('show');
+                resetToIdle();
+            }, 1500);
+        }
+
+        function discardVideo() {
+            recordedChunks = [];
+            dialog.classList.remove('show');
+            resetToIdle();
+        }
+
+        function resetToIdle() {
+            state = 'idle';
+            copatHead.classList.remove('recording');
+            copatBody.classList.remove('recording');
+            bandaid.classList.remove('countdown', 'recording');
+            copatHead.classList.remove('countdown');
+            displayText.className = '';
+            displayText.textContent = 'READY';
+            startTime = null;
+        }
+
+        // Add event listeners when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const qualityTrack = document.querySelector('#qualityToggle .toggle-track');
+            const startModeTrack = document.querySelector('#startModeToggle .toggle-track');
+            const videoTrack = document.querySelector('#videoToggle .toggle-track');
+            const webcamTrack = document.querySelector('#webcamToggle .toggle-track');
+            const audioTrack = document.querySelector('#audioToggle .toggle-track');
+            
+            videoTrack.addEventListener('click', function() {
+                toggleVideo();
+            });
+            
+            qualityTrack.addEventListener('click', function() {
+                toggleSwitch('qualityToggle');
+            });
+            
+            startModeTrack.addEventListener('click', function() {
+                toggleSwitch('startModeToggle');
+            });
+            
+            webcamTrack.addEventListener('click', function() {
+                toggleWebcam();
+            });
+            
+            audioTrack.addEventListener('click', function() {
+                toggleAudio();
+            });
+
+            // Add click handler to copat head (separate from inline onclick)
+            copatHead.addEventListener('click', function(e) {
+                // Only handle click if we're not dragging or just finished dragging
+                if (!isDragging && !justFinishedDragging) {
+                    handleMainButton();
+                }
+            });
+
+            // Load saved positions and settings, then show widgets
+            loadSavedPosition();
+            loadToggleSettings();
+            
+            // Show all widgets smoothly at the EXACT same time
+            requestAnimationFrame(() => {
+                // Add ready class to all widgets in one synchronous block
+                const widgets = [
+                    document.getElementById('widget'),
+                    document.getElementById('avsWidget'), 
+                    document.getElementById('webcamSettingsWidget'),
+                    document.getElementById('webcamVideoWidget'),
+                    document.getElementById('audioSettingsWidget')
+                ];
+                
+                // Force a reflow to ensure all widgets start hidden
+                widgets.forEach(w => w.offsetHeight);
+                
+                // Now fade them all in simultaneously
+                widgets.forEach(w => w.classList.add('ready'));
+                
+                // Hide webcam and audio widgets if not active
+                const webcamToggle = document.getElementById('webcamToggle');
+                const audioToggle = document.getElementById('audioToggle');
+                
+                if (!webcamToggle.classList.contains('active')) {
+                    setTimeout(() => {
+                        document.getElementById('webcamSettingsWidget').style.display = 'none';
+                        document.getElementById('webcamVideoWidget').style.display = 'none';
+                    }, 150);
+                }
+                
+                if (!audioToggle.classList.contains('active')) {
+                    setTimeout(() => {
+                        document.getElementById('audioSettingsWidget').style.display = 'none';
+                    }, 150);
+                }
+            });
+            
+            // Initialize underwater effect
+            initUnderwaterEffect();
+            
+            // Initialize director smoke effect
+            initDirectorSmoke();
+            
+            // Initialize webcam format selector
+            initWebcamFormatSelector();
+            
+            // Initialize FFmpeg
+            initFFmpeg();
+        });
+
+        // UNDERWATER MASTERPIECE with Three.js 🌊🐒✨
+        function initUnderwaterEffect() {
+            const canvas = document.getElementById('underwaterCanvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+            const renderer = new THREE.WebGLRenderer({ 
+                canvas, 
+                alpha: true, 
+                antialias: true,
+                premultipliedAlpha: false 
+            });
+            renderer.setSize(120, 120);
+            renderer.setClearColor(0x000000, 0);
+
+            // EPIC Underwater shader material
+            const underwaterMaterial = new THREE.ShaderMaterial({
+                transparent: true,
+                uniforms: {
+                    time: { value: 0 },
+                    opacity: { value: 0.4 },
+                    bubbleTime: { value: 0 },
+                    rayTime: { value: 0 }
+                },
+                vertexShader: `
+                    varying vec2 vUv;
+                    void main() {
+                        vUv = uv;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float opacity;
+                    uniform float bubbleTime;
+                    uniform float rayTime;
+                    varying vec2 vUv;
+                    
+                    // Enhanced caustic pattern
+                    float caustic(vec2 uv, float time) {
+                        vec2 p = uv * 6.0;
+                        
+                        for(int i = 1; i < 5; i++) {
+                            vec2 newp = p + time * 0.4;
+                            newp.x += 0.8 / float(i) * sin(float(i) * p.y + time * 2.0 + float(i) * 0.3) + 0.5;
+                            newp.y += 0.8 / float(i) * cos(float(i) * p.x + time * 1.8 + float(i) * 0.7) + 1.1;
+                            p = newp;
+                        }
+                        
+                        vec3 col = vec3(0.5 * sin(4.0 * p.x) + 0.5, 0.5 * sin(4.0 * p.y) + 0.5, sin(p.x + p.y));
+                        return col.x * col.y * col.z;
+                    }
+                    
+                    // Bubble function
+                    float bubble(vec2 uv, vec2 pos, float size, float phase) {
+                        vec2 p = uv - pos;
+                        p.y -= mod(bubbleTime * 0.3 + phase, 1.5) - 0.75; // Rising motion
+                        float dist = length(p);
+                        float bubble = smoothstep(size, size * 0.6, dist);
+                        float fadeOut = 1.0 - smoothstep(0.7, 1.0, mod(bubbleTime * 0.3 + phase, 1.5));
+                        return bubble * fadeOut;
+                    }
+                    
+                    // Light rays
+                    float lightRay(vec2 uv, float angle, float width, float intensity) {
+                        vec2 dir = vec2(cos(angle), sin(angle));
+                        vec2 pos = uv - vec2(0.5);
+                        float proj = dot(pos, dir);
+                        float dist = abs(dot(pos, vec2(-dir.y, dir.x)));
+                        return smoothstep(width, width * 0.3, dist) * intensity * 
+                               smoothstep(-0.7, 0.7, proj) * 
+                               (0.5 + 0.5 * sin(rayTime + angle * 3.0));
+                    }
+                    
+                    // Shimmer effect
+                    float shimmer(vec2 uv, float time) {
+                        return sin(uv.x * 15.0 + time * 3.0) * 
+                               sin(uv.y * 12.0 + time * 2.5) * 
+                               sin((uv.x + uv.y) * 8.0 + time * 4.0) * 0.1 + 0.05;
+                    }
+                    
+                    void main() {
+                        vec2 uv = vUv;
+                        vec3 color = vec3(0.0);
+                        
+                        // Enhanced caustics (keep it subtle but beautiful)
+                        float c1 = caustic(uv, time);
+                        float c2 = caustic(uv * 1.4, time * 0.7);
+                        float c3 = caustic(uv * 0.8, time * 1.3);
+                        float caustics = (c1 + c2 + c3) / 3.0;
+                        caustics = pow(caustics, 1.8);
+                        
+                        // Caustic colors (blue-green underwater)
+                        color += vec3(0.1, 0.7, 0.9) * caustics * 0.6;
+                        color += vec3(0.05, 0.5, 0.7) * caustics * 0.4;
+                        
+                        // Magical bubbles 🫧
+                        float bubbles = 0.0;
+                        bubbles += bubble(uv, vec2(0.2, 0.3), 0.025, 0.0);
+                        bubbles += bubble(uv, vec2(0.7, 0.6), 0.02, 1.0);
+                        bubbles += bubble(uv, vec2(0.4, 0.8), 0.018, 2.0);
+                        bubbles += bubble(uv, vec2(0.8, 0.2), 0.03, 3.0);
+                        bubbles += bubble(uv, vec2(0.1, 0.7), 0.015, 4.0);
+                        bubbles += bubble(uv, vec2(0.6, 0.1), 0.022, 5.0);
+                        
+                        // Bubble colors (bright cyan-white)
+                        color += vec3(0.6, 0.9, 1.0) * bubbles * 0.8;
+                        
+                        // Divine light rays ✨
+                        float rays = 0.0;
+                        rays += lightRay(uv, rayTime * 0.2 + 0.5, 0.008, 0.3);
+                        rays += lightRay(uv, rayTime * 0.15 + 1.2, 0.006, 0.25);
+                        rays += lightRay(uv, rayTime * 0.25 + 2.1, 0.01, 0.2);
+                        rays += lightRay(uv, rayTime * 0.18 + 3.4, 0.007, 0.35);
+                        
+                        // Ray colors (golden-white)
+                        color += vec3(1.0, 0.9, 0.7) * rays;
+                        
+                        // Subtle shimmer overlay
+                        float shimmerEffect = shimmer(uv, time);
+                        color += vec3(0.3, 0.8, 1.0) * shimmerEffect;
+                        
+                        // Final magic ✨
+                        float totalEffect = caustics * 0.6 + bubbles * 0.9 + rays * 0.7 + shimmerEffect * 0.3;
+                        
+                        gl_FragColor = vec4(color, totalEffect * opacity);
+                    }
+                `
+            });
+
+            // Create plane geometry
+            const geometry = new THREE.PlaneGeometry(2, 2);
+            const underwaterMesh = new THREE.Mesh(geometry, underwaterMaterial);
+            scene.add(underwaterMesh);
+
+            // EPIC Animation loop
+            function animate() {
+                underwaterMaterial.uniforms.time.value += 0.012;
+                underwaterMaterial.uniforms.bubbleTime.value += 0.016;
+                underwaterMaterial.uniforms.rayTime.value += 0.008;
+                renderer.render(scene, camera);
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+        // Toggle switch functionality
+        function toggleSwitch(switchId) {
+            const toggleElement = document.getElementById(switchId);
+            toggleElement.classList.toggle('active');
+            saveToggleSettings();
+        }
+
+        function saveToggleSettings() {
+            const video = document.getElementById('videoToggle').classList.contains('active') ? 'on' : 'off';
+            const quality = document.getElementById('qualityToggle').classList.contains('active') ? '4k' : '1080p';
+            const startMode = document.getElementById('startModeToggle').classList.contains('active') ? 'gotime' : 'countdown';
+            const webcam = document.getElementById('webcamToggle').classList.contains('active') ? 'on' : 'off';
+            const audio = document.getElementById('audioToggle').classList.contains('active') ? 'on' : 'off';
+            
+            // Save settings
+            const settings = { video, quality, startMode, webcam, audio };
+            localStorage.setItem('toggleSettings', JSON.stringify(settings));
+        }
+
+        function toggleVideo() {
+            const videoToggle = document.getElementById('videoToggle');
+            const videoSettings = document.querySelectorAll('.video-settings');
+            
+            if (videoToggle.classList.contains('active')) {
+                // Turn OFF video
+                videoToggle.classList.remove('active');
+                
+                // Hide video sub-settings
+                videoSettings.forEach(setting => {
+                    setting.style.display = 'none';
+                });
+                
+                // Silently turn off webcam if it was on (no error message)
+                const webcamToggle = document.getElementById('webcamToggle');
+                if (webcamToggle.classList.contains('active')) {
+                    // Close webcam directly without going through toggleWebcam
+                    const webcamSettingsWidget = document.getElementById('webcamSettingsWidget');
+                    const webcamVideoWidget = document.getElementById('webcamVideoWidget');
+                    const webcamVideo = document.getElementById('webcamVideo');
+                    
+                    closePictureInPictureIfActive();
+                    
+                    if (webcamStream) {
+                        webcamStream.getTracks().forEach(track => track.stop());
+                        webcamStream = null;
+                    }
+                    webcamVideo.srcObject = null;
+                    
+                    // Hide widgets completely
+                    webcamSettingsWidget.classList.remove('show');
+                    webcamVideoWidget.classList.remove('show');
+                    webcamSettingsWidget.style.display = 'none';
+                    webcamVideoWidget.style.display = 'none';
+                    webcamToggle.classList.remove('active');
+                    
+                    // Reset PiP state
+                    const floatToggle = document.getElementById('webcamFloatToggle');
+                    floatToggle.classList.remove('active');
+                    isPictureInPicture = false;
+                    pipWindow = null;
+                }
+                
+            } else {
+                // Turn ON video  
+                videoToggle.classList.add('active');
+                
+                // Show video sub-settings
+                videoSettings.forEach(setting => {
+                    setting.style.display = 'block';
+                });
+            }
+            
+            saveToggleSettings();
+        }
+
+        function generateBookmarkletCode(captureMode) {
+            const baseCode = `
+                javascript:(function(){
+                    const mode = '${captureMode}';
+                    
+                    async function captureScreen() {
+                        try {
+                            const displayMediaOptions = {
+                                video: {
+                                    mediaSource: 'screen',
+                                    displaySurface: 'monitor',
+                                    cursor: 'never'
+                                },
+                                audio: false
+                            };
+                            
+                            if (mode === 'select') {
+                                displayMediaOptions.video.displaySurface = 'window';
+                            }
+                            
+                            const stream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+                            const video = document.createElement('video');
+                            video.srcObject = stream;
+                            video.play();
+                            
+                            video.addEventListener('loadedmetadata', () => {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = video.videoWidth;
+                                canvas.height = video.videoHeight;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(video, 0, 0);
+                                
+                                stream.getTracks().forEach(track => track.stop());
+                                
+                                canvas.toBlob(blob => {
+                                    const url = URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = 'screenshot-' + new Date().toISOString().slice(0, 19).replace(/:/g, '-') + '.png';
+                                    a.click();
+                                    URL.revokeObjectURL(url);
+                                });
+                            });
+                        } catch (err) {
+                            console.error('Screen capture failed:', err);
+                        }
+                    }
+                    
+                    captureScreen();
+                })();
+            `;
+            return baseCode.replace(/\s+/g, ' ').trim();
+        }
+
+        function loadToggleSettings() {
+            const savedSettings = localStorage.getItem('toggleSettings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                
+                // Disable transitions on ALL toggles to prevent glitching
+                const videoThumb = document.querySelector('#videoToggle .toggle-thumb');
+                const videoLabels = document.querySelectorAll('#videoToggle .toggle-label');
+                const qualityThumb = document.querySelector('#qualityToggle .toggle-thumb');
+                const qualityLabels = document.querySelectorAll('#qualityToggle .toggle-label');
+                const startModeThumb = document.querySelector('#startModeToggle .toggle-thumb');
+                const startModeLabels = document.querySelectorAll('#startModeToggle .toggle-label');
+                const webcamThumb = document.querySelector('#webcamToggle .toggle-thumb');
+                const webcamLabels = document.querySelectorAll('#webcamToggle .toggle-label');
+                
+                videoThumb.style.transition = 'none';
+                videoLabels.forEach(label => label.style.transition = 'none');
+                qualityThumb.style.transition = 'none';
+                qualityLabels.forEach(label => label.style.transition = 'none');
+                startModeThumb.style.transition = 'none';
+                startModeLabels.forEach(label => label.style.transition = 'none');
+                webcamThumb.style.transition = 'none';
+                webcamLabels.forEach(label => label.style.transition = 'none');
+                
+                const videoToggle = document.getElementById('videoToggle');
+                const qualityToggle = document.getElementById('qualityToggle');
+                const startModeToggle = document.getElementById('startModeToggle');
+                const webcamToggle = document.getElementById('webcamToggle');
+                const videoSettings = document.querySelectorAll('.video-settings');
+                
+                // Restore video toggle and show/hide sub-settings
+                if (settings.video === 'on') {
+                    videoToggle.classList.add('active');
+                    videoSettings.forEach(setting => setting.style.display = 'block');
+                } else {
+                    videoToggle.classList.remove('active');
+                    videoSettings.forEach(setting => setting.style.display = 'none');
+                }
+                
+                if (settings.quality === '4k') {
+                    qualityToggle.classList.add('active');
+                } else {
+                    qualityToggle.classList.remove('active');
+                }
+                
+                if (settings.startMode === 'gotime') {
+                    startModeToggle.classList.add('active');
+                } else {
+                    startModeToggle.classList.remove('active');
+                }
+                
+                // Auto-restore webcam state - only if video is also on
+                if (settings.webcam === 'on' && settings.video === 'on') {
+                    webcamToggle.classList.add('active');
+                    
+                    setTimeout(async () => {
+                        try {
+                            const webcamSettingsWidget = document.getElementById('webcamSettingsWidget');
+                            const webcamVideoWidget = document.getElementById('webcamVideoWidget');
+                            const webcamVideo = document.getElementById('webcamVideo');
+                            
+                            webcamStream = await navigator.mediaDevices.getUserMedia({ 
+                                video: { 
+                                    width: { ideal: 640 }, 
+                                    height: { ideal: 480 } 
+                                }, 
+                                audio: false 
+                            });
+                            webcamVideo.srcObject = webcamStream;
+                            webcamSettingsWidget.classList.add('show');
+                            webcamVideoWidget.classList.add('show');
+                            
+                            applyWebcamFormat(currentWebcamFormat);
+                        } catch (err) {
+                            console.log('Auto-restore webcam failed:', err);
+                            webcamToggle.classList.remove('active');
+                        }
+                    }, 100);
+                }
+                
+                // Re-enable transitions after a frame
+                requestAnimationFrame(() => {
+                    videoThumb.style.transition = '';
+                    videoLabels.forEach(label => label.style.transition = '');
+                    qualityThumb.style.transition = '';
+                    qualityLabels.forEach(label => label.style.transition = '');
+                    startModeThumb.style.transition = '';
+                    startModeLabels.forEach(label => label.style.transition = '');
+                    webcamThumb.style.transition = '';
+                    webcamLabels.forEach(label => label.style.transition = '');
+                });
+            }
+        }
+
+        // Director Smoke Effect 💨🎬
+        function initDirectorSmoke() {
+            const canvas = document.getElementById('directorSmokeCanvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+            renderer.setSize(800, 120);
+            renderer.setClearColor(0x000000, 0);
+
+            // Subtle smoke shader
+            const smokeMaterial = new THREE.ShaderMaterial({
+                transparent: true,
+                uniforms: {
+                    time: { value: 0 },
+                    opacity: { value: 0.6 }
+                },
+                vertexShader: `
+                    varying vec2 vUv;
+                    void main() {
+                        vUv = uv;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float opacity;
+                    varying vec2 vUv;
+                    
+                    // Noise function for smoke
+                    float noise(vec2 p) {
+                        return sin(p.x * 12.9898 + p.y * 78.233) * 43758.5453;
+                    }
+                    
+                    float smoothNoise(vec2 p) {
+                        vec2 i = floor(p);
+                        vec2 f = fract(p);
+                        f = f * f * (3.0 - 2.0 * f);
+                        
+                        float a = noise(i);
+                        float b = noise(i + vec2(1.0, 0.0));
+                        float c = noise(i + vec2(0.0, 1.0));
+                        float d = noise(i + vec2(1.0, 1.0));
+                        
+                        return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+                    }
+                    
+                    // Smoke wisps
+                    float smoke(vec2 uv, float time) {
+                        vec2 p = uv * 3.0;
+                        
+                        // Rising motion
+                        p.y -= time * 0.3;
+                        
+                        // Swirling motion
+                        p.x += sin(p.y * 2.0 + time) * 0.3;
+                        p.x += cos(p.y * 1.5 + time * 0.7) * 0.2;
+                        
+                        float n1 = smoothNoise(p) * 0.5;
+                        float n2 = smoothNoise(p * 2.0) * 0.25;
+                        float n3 = smoothNoise(p * 4.0) * 0.125;
+                        
+                        float noise = n1 + n2 + n3;
+                        
+                        // Fade out towards top
+                        float fadeOut = 1.0 - smoothstep(0.3, 1.0, uv.y);
+                        
+                        // Fade in from bottom
+                        float fadeIn = smoothstep(0.0, 0.2, uv.y);
+                        
+                        // Extended fade out towards right side to cover full polygon
+                        float fadeRight = 1.0 - smoothstep(1.2, 1.5, uv.x);
+                        
+                        return noise * fadeOut * fadeIn * fadeRight;
+                    }
+                    
+                    void main() {
+                        vec2 uv = vUv;
+                        
+                        // Multiple smoke layers
+                        float smoke1 = smoke(uv + vec2(0.1, 0.0), time);
+                        float smoke2 = smoke(uv + vec2(-0.05, 0.0), time * 0.8);
+                        float smoke3 = smoke(uv + vec2(0.0, 0.0), time * 1.2);
+                        
+                        float totalSmoke = (smoke1 + smoke2 + smoke3) / 3.0;
+                        totalSmoke = smoothstep(0.1, 0.7, totalSmoke);
+                        totalSmoke = pow(totalSmoke, 0.8); // Make it more visible
+                        
+                        // Smoke color (more visible gray)
+                        vec3 smokeColor = vec3(0.7, 0.75, 0.8);
+                        
+                        gl_FragColor = vec4(smokeColor, totalSmoke * opacity);
+                    }
+                `
+            });
+
+            const geometry = new THREE.PlaneGeometry(2, 2);
+            const smokeMesh = new THREE.Mesh(geometry, smokeMaterial);
+            scene.add(smokeMesh);
+
+            // Animation loop
+            function animateSmoke() {
+                smokeMaterial.uniforms.time.value += 0.008;
+                renderer.render(scene, camera);
+                requestAnimationFrame(animateSmoke);
+            }
+
+            animateSmoke();
+        }
+
+        // Webcam functionality
+        let webcamStream = null;
+        let currentWebcamFormat = '16:9';
+        let currentWebcamSize = 'small';
+        let currentWebcamZoom = 'normal';
+        let currentRandomFormat = null;
+        let isPictureInPicture = false;
+        let pipWindow = null;
+
+        // Audio functionality
+        let audioContext = null;
+        let audioStream = null;
+        let audioAnalyser = null;
+        let audioSource = null;
+        let currentAudioSource = 'microphone';
+        let gainNode = null;
+        let isAudioActive = false;
+        let audioMeterInterval = null;
+
+        async function toggleWebcam() {
+            const videoToggle = document.getElementById('videoToggle');
+            
+            // Check if video is enabled first
+            if (!videoToggle.classList.contains('active')) {
+                alert('Please enable Video Recording first to use webcam!');
+                return;
+            }
+            
+            const webcamToggle = document.getElementById('webcamToggle');
+            const webcamSettingsWidget = document.getElementById('webcamSettingsWidget');
+            const webcamVideoWidget = document.getElementById('webcamVideoWidget');
+            const webcamVideo = document.getElementById('webcamVideo');
+            
+            if (webcamToggle.classList.contains('active')) {
+                // Turn OFF webcam
+                closePictureInPictureIfActive();
+                
+                if (webcamStream) {
+                    webcamStream.getTracks().forEach(track => track.stop());
+                    webcamStream = null;
+                }
+                webcamVideo.srcObject = null;
+                
+                // Hide widgets completely
+                webcamSettingsWidget.classList.remove('show');
+                webcamVideoWidget.classList.remove('show');
+                webcamSettingsWidget.style.display = 'none';
+                webcamVideoWidget.style.display = 'none';
+                webcamToggle.classList.remove('active');
+                
+                // Reset PiP state
+                const floatToggle = document.getElementById('webcamFloatToggle');
+                floatToggle.classList.remove('active');
+                isPictureInPicture = false;
+                pipWindow = null;
+            } else {
+                // Turn ON webcam - try multiple approaches for compatibility
+                try {
+                    // Try modern API first
+                    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                        webcamStream = await navigator.mediaDevices.getUserMedia({ 
+                            video: { 
+                                width: { ideal: 640 }, 
+                                height: { ideal: 480 } 
+                            }, 
+                            audio: false 
+                        });
+                    }
+                    // Fallback for older browsers
+                    else if (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
+                        const getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+                        webcamStream = await new Promise((resolve, reject) => {
+                            getUserMedia.call(navigator, { video: true, audio: false }, resolve, reject);
+                        });
+                    }
+                    else {
+                        throw new Error('Webcam not supported in this browser');
+                    }
+                    
+                    webcamVideo.srcObject = webcamStream;
+                    webcamToggle.classList.add('active');
+                    
+                    // Show widgets completely
+                    webcamSettingsWidget.style.display = 'block';
+                    webcamVideoWidget.style.display = 'block';
+                    webcamSettingsWidget.classList.add('show');
+                    webcamVideoWidget.classList.add('show');
+                    
+                    // Keep video playing even when tab is inactive
+                    webcamVideo.play();
+                    
+                    // Force video to continue playing during tab switches
+                    document.addEventListener('visibilitychange', handleVisibilityChange);
+                    
+                    // Apply current format and zoom
+                    applyWebcamFormat(currentWebcamFormat);
+                    applyWebcamZoom();
+                } catch (err) {
+                    console.error('Webcam access failed:', err);
+                    
+                    let errorMessage = 'Could not access webcam. ';
+                    
+                    if (err.name === 'NotAllowedError') {
+                        errorMessage += 'Please allow camera access and try again.';
+                    } else if (err.name === 'NotFoundError') {
+                        errorMessage += 'No camera found. Please connect a camera.';
+                    } else if (err.name === 'NotSupportedError') {
+                        errorMessage += 'Camera not supported in this browser.';
+                    } else if (location.protocol === 'file:') {
+                        errorMessage += 'Please serve this page over HTTP/HTTPS (not file://).';
+                    } else if (location.protocol === 'http:' && location.hostname !== 'localhost') {
+                        errorMessage += 'Camera requires HTTPS. Try using localhost or HTTPS.';
+                    } else {
+                        errorMessage += err.message;
+                    }
+                    
+                    alert(errorMessage);
+                    return;
+                }
+            }
+            
+            // Save webcam state whenever it changes
+            saveToggleSettings();
+        }
+
+        async function toggleAudio() {
+            const audioToggle = document.getElementById('audioToggle');
+            const audioSettingsWidget = document.getElementById('audioSettingsWidget');
+            
+            if (audioToggle.classList.contains('active')) {
+                // Turn OFF audio
+                if (audioStream) {
+                    audioStream.getTracks().forEach(track => track.stop());
+                    audioStream = null;
+                }
+                if (audioContext) {
+                    audioContext.close();
+                    audioContext = null;
+                }
+                if (audioMeterInterval) {
+                    clearInterval(audioMeterInterval);
+                    audioMeterInterval = null;
+                }
+                
+                audioSettingsWidget.classList.remove('show');
+                audioSettingsWidget.style.display = 'none';
+                audioToggle.classList.remove('active');
+                isAudioActive = false;
+                
+                // Reset meter
+                document.getElementById('meterFill').style.width = '0%';
+                
+            } else {
+                // Turn ON audio
+                try {
+                    // Get microphone access first (let browser choose optimal settings)
+                    audioStream = await navigator.mediaDevices.getUserMedia({
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: false
+                        }
+                    });
+                    
+                    // Initialize Web Audio API with default sample rate
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    console.log('Audio initialized at', audioContext.sampleRate + 'Hz');
+                    
+                    // Setup audio processing
+                    audioSource = audioContext.createMediaStreamSource(audioStream);
+                    gainNode = audioContext.createGain();
+                    audioAnalyser = audioContext.createAnalyser();
+                    audioAnalyser.fftSize = 256;
+                    
+                    // Connect audio nodes
+                    audioSource.connect(gainNode);
+                    gainNode.connect(audioAnalyser);
+                    
+                    // Set initial gain (50%)
+                    gainNode.gain.value = 0.5;
+                    
+                    // Show AAS widget with proper display
+                    audioSettingsWidget.style.display = 'block';
+                    audioSettingsWidget.classList.add('show');
+                    audioToggle.classList.add('active');
+                    isAudioActive = true;
+                    
+                    // Start audio meter updates
+                    startAudioMeters();
+                    
+                    console.log('Audio initialized: 48kHz, stereo, noise suppression ON');
+                    
+                } catch (err) {
+                    console.error('Audio access failed:', err);
+                    alert('Could not access microphone: ' + err.message);
+                    return;
+                }
+            }
+            
+            // Save audio state
+            saveToggleSettings();
+        }
+
+        function startAudioMeters() {
+            if (!audioAnalyser) return;
+            
+            const bufferLength = audioAnalyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            
+            audioMeterInterval = setInterval(() => {
+                audioAnalyser.getByteFrequencyData(dataArray);
+                
+                // Calculate average level
+                let sum = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    sum += dataArray[i];
+                }
+                const average = sum / bufferLength;
+                
+                // More sensitive calculation with amplification
+                let percentage = (average / 255) * 100;
+                percentage = Math.min(100, percentage * 1.8); // 80% amplification, cap at 100%
+                
+                // Update single meter
+                document.getElementById('meterFill').style.width = percentage + '%';
+                
+            }, 50); // 20fps meter updates
+        }
+
+        function handleVisibilityChange() {
+            const webcamVideo = document.getElementById('webcamVideo');
+            
+            // Always try to keep webcam playing
+            if (webcamStream && webcamVideo) {
+                if (webcamVideo.paused) {
+                    webcamVideo.play().catch(err => {
+                        console.log('Could not resume webcam:', err);
+                    });
+                }
+            }
+        }
+
+        // Keep webcam alive during tab switches
+        function keepWebcamAlive() {
+            const webcamVideo = document.getElementById('webcamVideo');
+            
+            if (webcamStream && webcamVideo) {
+                // Force video element to stay active
+                webcamVideo.setAttribute('playsinline', true);
+                webcamVideo.setAttribute('autoplay', true);
+                webcamVideo.muted = true;
+                
+                // Ensure it's playing
+                if (webcamVideo.paused) {
+                    webcamVideo.play().catch(err => {
+                        console.log('Webcam play failed:', err);
+                    });
+                }
+            }
+        }
+
+        // Check webcam status every 2 seconds
+        setInterval(keepWebcamAlive, 2000);
+
+        function getPopupFormatStyle() {
+            const webcamContainer = document.getElementById('webcamContainer');
+            const currentFormat = currentWebcamFormat;
+            
+            let style = {
+                bodyStyle: '',
+                containerStyle: '',
+                videoStyle: '',
+                label: 'COLOGGER'
+            };
+            
+            switch(currentFormat) {
+                case '16:9':
+                    style.containerStyle = 'border-radius: 12px;';
+                    style.videoStyle = 'border-radius: 8px;';
+                    style.label = 'COLOG 16:9';
+                    break;
+                    
+                case '9:16':
+                    style.containerStyle = 'border-radius: 12px;';
+                    style.videoStyle = 'border-radius: 8px;';
+                    style.label = 'COLOG 9:16';
+                    break;
+                    
+                case 'round':
+                    style.containerStyle = 'border-radius: 50%;';
+                    style.videoStyle = 'border-radius: 50%;';
+                    style.label = 'COLOG ⭕';
+                    break;
+                    
+                case 'random':
+                    if (currentRandomFormat) {
+                        style.containerStyle = `
+                            border-radius: ${currentRandomFormat.borderRadius};
+                            ${currentRandomFormat.clipPath !== 'none' ? `clip-path: ${currentRandomFormat.clipPath};` : ''}
+                        `;
+                        style.videoStyle = `
+                            border-radius: ${currentRandomFormat.borderRadius};
+                            ${currentRandomFormat.clipPath !== 'none' ? `clip-path: ${currentRandomFormat.clipPath};` : ''}
+                        `;
+                        style.label = 'COLOG 🎲';
+                        
+                        // Special handling for complex shapes
+                        if (currentRandomFormat.clipPath.includes('polygon')) {
+                            if (currentRandomFormat.clipPath.includes('50% 0%, 100% 25%')) {
+                                style.label = 'COLOG ⬡'; // Hexagon
+                            } else if (currentRandomFormat.clipPath.includes('61% 35%')) {
+                                style.label = 'COLOG ⭐'; // Star
+                            } else if (currentRandomFormat.clipPath.includes('100% 50%')) {
+                                style.label = 'COLOG ♦️'; // Diamond
+                            } else if (currentRandomFormat.clipPath.includes('30% 0%')) {
+                                style.label = 'COLOG ⬛'; // Octagon
+                            }
+                        }
+                    }
+                    break;
+                    
+                default:
+                    style.containerStyle = 'border-radius: 12px;';
+                    style.videoStyle = 'border-radius: 8px;';
+                    break;
+            }
+            
+            return style;
+        }
+
+        async function togglePictureInPicture() {
+            const floatToggle = document.getElementById('webcamFloatToggle');
+            const webcamVideo = document.getElementById('webcamVideo');
+            const webcamVideoWidget = document.getElementById('webcamVideoWidget');
+            
+            if (!webcamVideo || !webcamStream) {
+                alert('Please turn on webcam first!');
+                return;
+            }
+            
+            try {
+                if (!isPictureInPicture) {
+                    // Try multiple PiP approaches for maximum compatibility
+                    let pipSuccess = false;
+                    
+                    // Method 1: Standard PiP API
+                    if (!pipSuccess && document.pictureInPictureEnabled && webcamVideo.requestPictureInPicture) {
+                        try {
+                            pipWindow = await webcamVideo.requestPictureInPicture();
+                            pipSuccess = true;
+                        } catch (pipErr) {
+                            console.log('Standard PiP failed:', pipErr);
+                        }
+                    }
+                    
+                    // Method 2: Check if video element supports PiP
+                    if (!pipSuccess && 'requestPictureInPicture' in webcamVideo) {
+                        try {
+                            pipWindow = await webcamVideo.requestPictureInPicture();
+                            pipSuccess = true;
+                        } catch (pipErr) {
+                            console.log('Video PiP failed:', pipErr);
+                        }
+                    }
+                    
+                    // Method 3: Popup window fallback for all browsers
+                    if (!pipSuccess) {
+                        try {
+                            // Create a simple popup with webcam
+                            const popupWidth = 300;
+                            const popupHeight = 200;
+                            const left = screen.width - popupWidth - 50;
+                            const top = 50;
+                            
+                            pipWindow = window.open('', 'cologgerWebcam', 
+                                `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,alwaysOnTop=yes`);
+                            
+                            if (pipWindow) {
+                                pipWindow.document.write(`
+                                    <!DOCTYPE html>
+                                    <html>
+                                    <head>
+                                        <title>🎬 COLOGGER Webcam</title>
+                                        <style>
+                                            body { margin: 0; padding: 0; background: #2C3E50; overflow: hidden; }
+                                            video { width: 100%; height: 100%; object-fit: cover; }
+                                            .label { position: absolute; top: 5px; left: 5px; color: white; font-size: 10px; font-family: sans-serif; }
+                                        </style>
+                                    </head>
+                                    <body>
+                                        <div class="label">🎬 COLOGGER</div>
+                                        <video id="popupWebcam" autoplay muted playsinline></video>
+                                    </body>
+                                    </html>
+                                `);
+                                pipWindow.document.close();
+                                
+                                // Clone the video stream to popup
+                                const popupVideo = pipWindow.document.getElementById('popupWebcam');
+                                if (popupVideo && webcamStream) {
+                                    popupVideo.srcObject = webcamStream;
+                                }
+                                
+                                pipSuccess = true;
+                            }
+                        } catch (popupErr) {
+                            console.log('Popup fallback failed:', popupErr);
+                        }
+                    }
+                    
+                    if (pipSuccess) {
+                        // Success - setup floating state
+                        webcamVideoWidget.style.opacity = '0.3';
+                        webcamVideoWidget.style.pointerEvents = 'none';
+                        floatToggle.classList.add('active');
+                        isPictureInPicture = true;
+                        
+                        // Universal close handlers
+                        const handleClose = () => {
+                            webcamVideoWidget.style.opacity = '1';
+                            webcamVideoWidget.style.pointerEvents = 'auto';
+                            floatToggle.classList.remove('active');
+                            isPictureInPicture = false;
+                            pipWindow = null;
+                        };
+                        
+                        // For real PiP
+                        document.addEventListener('leavepictureinpicture', handleClose);
+                        
+                        // For popup window
+                        if (pipWindow && pipWindow.window) {
+                            const checkClosed = setInterval(() => {
+                                if (pipWindow.closed) {
+                                    clearInterval(checkClosed);
+                                    handleClose();
+                                }
+                            }, 1000);
+                        }
+                        
+                        // For PiP window events
+                        if (pipWindow && pipWindow.addEventListener) {
+                            pipWindow.addEventListener('resize', () => {
+                                console.log('PiP resized');
+                            });
+                        }
+                        
+                    } else {
+                        alert('Floating webcam not available. Please allow popups or use a supported browser.');
+                    }
+                } else {
+                    // Exit Picture-in-Picture
+                    if (document.pictureInPictureElement) {
+                        await document.exitPictureInPicture();
+                    }
+                    
+                    webcamVideoWidget.style.opacity = '1';
+                    webcamVideoWidget.style.pointerEvents = 'auto';
+                    floatToggle.classList.remove('active');
+                    isPictureInPicture = false;
+                    pipWindow = null;
+                }
+                
+            } catch (err) {
+                console.error('Picture-in-Picture failed:', err);
+                alert('Could not enable Picture-in-Picture: ' + err.message);
+                floatToggle.classList.remove('active');
+            }
+        }
+
+        // Make sure PiP closes properly when webcam is turned off
+        function closePictureInPictureIfActive() {
+            if (isPictureInPicture && document.pictureInPictureElement) {
+                document.exitPictureInPicture().catch(err => {
+                    console.log('Error closing PiP:', err);
+                });
+            }
+        }
+
+        function applyWebcamFormat(format) {
+            const webcamContainer = document.getElementById('webcamContainer');
+            const webcamVideoWidget = document.getElementById('webcamVideoWidget');
+            
+            // Remove all format classes first
+            webcamContainer.classList.remove('format-16-9', 'format-9-16', 'format-round', 'format-random');
+            
+            // Reset any inline styles from random format
+            webcamContainer.style.width = '';
+            webcamContainer.style.height = '';
+            webcamContainer.style.borderRadius = '';
+            webcamContainer.style.clipPath = '';
+            
+            // Apply format-specific logic
+            switch(format) {
+                case '16:9':
+                    const size169 = getSizeMultiplier();
+                    webcamVideoWidget.style.width = Math.round(140 * size169) + 'px';
+                    webcamVideoWidget.style.height = Math.round(110 * size169) + 'px';
+                    webcamContainer.style.width = Math.round(140 * size169) + 'px';
+                    webcamContainer.style.height = Math.round(85 * size169) + 'px';
+                    webcamContainer.classList.add('format-16-9');
+                    break;
+                case '9:16':
+                    const size916 = getSizeMultiplier();
+                    webcamVideoWidget.style.width = Math.round(110 * size916) + 'px';
+                    webcamVideoWidget.style.height = Math.round(165 * size916) + 'px';
+                    webcamContainer.style.width = Math.round(85 * size916) + 'px';
+                    webcamContainer.style.height = Math.round(140 * size916) + 'px';
+                    webcamContainer.classList.add('format-9-16');
+                    break;
+                case 'round':
+                    const sizeRound = getSizeMultiplier();
+                    webcamVideoWidget.style.width = Math.round(125 * sizeRound) + 'px';
+                    webcamVideoWidget.style.height = Math.round(125 * sizeRound) + 'px';
+                    webcamContainer.style.width = Math.round(100 * sizeRound) + 'px';
+                    webcamContainer.style.height = Math.round(100 * sizeRound) + 'px';
+                    webcamContainer.classList.add('format-round');
+                    break;
+                case 'random':
+                    applyRandomFormat();
+                    break;
+            }
+            
+            currentWebcamFormat = format;
+        }
+
+        function applyRandomFormat() {
+            const webcamContainer = document.getElementById('webcamContainer');
+            const webcamVideoWidget = document.getElementById('webcamVideoWidget');
+            
+            // Only pick new random format if we don't have one
+            if (!currentRandomFormat) {
+                // Random formats array
+                const randomFormats = [
+                    // Squares
+                    { width: 80, height: 80, borderRadius: '0px', clipPath: 'none' },
+                    { width: 120, height: 120, borderRadius: '0px', clipPath: 'none' },
+                    
+                    // Circles
+                    { width: 90, height: 90, borderRadius: '50%', clipPath: 'none' },
+                    { width: 110, height: 110, borderRadius: '50%', clipPath: 'none' },
+                    
+                    // Rectangles
+                    { width: 140, height: 70, borderRadius: '8px', clipPath: 'none' },
+                    { width: 70, height: 140, borderRadius: '8px', clipPath: 'none' },
+                    
+                    // Rounded rectangles
+                    { width: 130, height: 80, borderRadius: '25px', clipPath: 'none' },
+                    { width: 80, height: 130, borderRadius: '25px', clipPath: 'none' },
+                    
+                    // Hexagon
+                    { width: 100, height: 100, borderRadius: '0px', clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' },
+                    
+                    // Star
+                    { width: 110, height: 110, borderRadius: '0px', clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' },
+                    
+                    // Diamond
+                    { width: 100, height: 100, borderRadius: '0px', clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' },
+                    
+                    // Octagon
+                    { width: 100, height: 100, borderRadius: '0px', clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)' },
+                    
+                    // Oval (horizontal)
+                    { width: 130, height: 90, borderRadius: '50%', clipPath: 'none' },
+                    
+                    // Oval (vertical)  
+                    { width: 90, height: 130, borderRadius: '50%', clipPath: 'none' }
+                ];
+                
+                // Pick new random format
+                currentRandomFormat = randomFormats[Math.floor(Math.random() * randomFormats.length)];
+            }
+            
+            // Apply current random format with size multiplier
+            const sizeMultiplier = getSizeMultiplier();
+            const scaledWidth = Math.round(currentRandomFormat.width * sizeMultiplier);
+            const scaledHeight = Math.round(currentRandomFormat.height * sizeMultiplier);
+            
+            webcamVideoWidget.style.width = scaledWidth + 'px';
+            webcamVideoWidget.style.height = scaledHeight + 'px';
+            webcamContainer.style.width = scaledWidth + 'px';
+            webcamContainer.style.height = scaledHeight + 'px';
+            webcamContainer.style.borderRadius = currentRandomFormat.borderRadius;
+            webcamContainer.style.clipPath = currentRandomFormat.clipPath;
+            
+            webcamContainer.classList.add('format-random');
+        }
+
+        function initWebcamFormatSelector() {
+            const formatOptions = document.querySelectorAll('.format-option');
+            
+            formatOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    const format = option.getAttribute('data-format');
+                    
+                    // Special handling for random - always generate new
+                    if (format === 'random') {
+                        currentRandomFormat = null; // Force new random
+                    }
+                    
+                    // Remove active from all options
+                    formatOptions.forEach(opt => opt.classList.remove('active'));
+                    
+                    // Add active to clicked option
+                    option.classList.add('active');
+                    
+                    // Apply format
+                    applyWebcamFormat(format);
+                });
+            });
+
+            // Initialize webcam toggles
+            const sizeTrack = document.querySelector('#webcamSizeToggle .webcam-toggle-track');
+            const zoomTrack = document.querySelector('#webcamZoomToggle .webcam-toggle-track');
+            const floatTrack = document.querySelector('#webcamFloatToggle .webcam-toggle-track');
+            
+            sizeTrack.addEventListener('click', function() {
+                toggleWebcamSize();
+            });
+            
+            zoomTrack.addEventListener('click', function() {
+                toggleWebcamZoom();
+            });
+            
+            floatTrack.addEventListener('click', function() {
+                togglePictureInPicture();
+            });
+            
+            // Initialize audio controls
+            const gainSlider = document.getElementById('gainSlider');
+            const gainValue = document.getElementById('gainValue');
+            const noiseGateTrack = document.querySelector('#noiseGateToggle .audio-toggle-track');
+            const sourceOptions = document.querySelectorAll('.source-option');
+            
+            // Gain slider
+            gainSlider.addEventListener('input', function() {
+                const value = this.value;
+                gainValue.textContent = value + '%';
+                
+                // Apply gain to audio if active
+                if (gainNode) {
+                    gainNode.gain.value = value / 100;
+                }
+            });
+            
+            // Noise gate toggle
+            noiseGateTrack.addEventListener('click', function() {
+                const noiseGateToggle = document.getElementById('noiseGateToggle');
+                noiseGateToggle.classList.toggle('active');
+                
+                const isActive = noiseGateToggle.classList.contains('active');
+                console.log('Noise gate:', isActive ? 'ON' : 'OFF');
+                // TODO: Implement actual noise gate logic
+            });
+            
+            // Source selector
+            sourceOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    const source = option.getAttribute('data-source');
+                    
+                    // Remove active from all options
+                    sourceOptions.forEach(opt => opt.classList.remove('active'));
+                    
+                    // Add active to clicked option
+                    option.classList.add('active');
+                    
+                    currentAudioSource = source;
+                    console.log('Audio source changed to:', source);
+                    // TODO: Implement source switching logic
+                });
+            });
+        }
+
+        function toggleWebcamSize() {
+            const sizeToggle = document.getElementById('webcamSizeToggle');
+            sizeToggle.classList.toggle('active');
+            
+            currentWebcamSize = sizeToggle.classList.contains('active') ? 'big' : 'small';
+            
+            // Re-apply current format with new size (but keep same random format)
+            applyWebcamFormat(currentWebcamFormat);
+        }
+
+        function toggleWebcamZoom() {
+            const zoomToggle = document.getElementById('webcamZoomToggle');
+            zoomToggle.classList.toggle('active');
+            
+            currentWebcamZoom = zoomToggle.classList.contains('active') ? 'zoom' : 'normal';
+            applyWebcamZoom();
+        }
+
+        function applyWebcamZoom() {
+            const webcamVideo = document.getElementById('webcamVideo');
+            
+            if (currentWebcamZoom === 'zoom') {
+                webcamVideo.style.transform = 'scale(1.5)';
+            } else {
+                webcamVideo.style.transform = 'scale(1)';
+            }
+        }
+
+        function getSizeMultiplier() {
+            return currentWebcamSize === 'big' ? 1.4 : 1.0;
+        }
+
+        function resetWidgetPositions() {
+            // Remove saved positions from localStorage  
+            localStorage.removeItem('copatPosition');
+            localStorage.removeItem('webcamSettingsPosition');
+            localStorage.removeItem('webcamVideoPosition');
+            localStorage.removeItem('audioSettingsPosition');
+            
+            // Reset Copat widget to original position
+            widget.style.position = 'fixed';
+            widget.style.left = '50%';
+            widget.style.top = '15%';
+            widget.style.transform = 'translateX(-50%)';
+            widget.style.right = '';
+            widget.style.zIndex = '998';
+            
+            // Static menu doesn't need reset - it's always in fixed position
+            
+            // Reset Webcam Settings widget to original position
+            const webcamSettingsWidget = document.getElementById('webcamSettingsWidget');
+            webcamSettingsWidget.style.position = 'fixed';
+            webcamSettingsWidget.style.left = '75%';
+            webcamSettingsWidget.style.top = '20%';
+            webcamSettingsWidget.style.transform = 'translateX(-50%)';
+            webcamSettingsWidget.style.right = '';
+            webcamSettingsWidget.style.zIndex = '997';
+            
+            // Reset Webcam Video widget to original position
+            const webcamVideoWidget = document.getElementById('webcamVideoWidget');
+            webcamVideoWidget.style.position = 'fixed';
+            webcamVideoWidget.style.left = '20%';
+            webcamVideoWidget.style.top = '30%';
+            webcamVideoWidget.style.transform = 'translateX(-50%)';
+            webcamVideoWidget.style.right = '';
+            webcamVideoWidget.style.zIndex = '999';
+        }
+    </script>
+</body>
+</html>
