@@ -719,19 +719,7 @@
             }
         }
 
-        /* Director Set Image - Bottom Left */
-        .director-set {
-            position: fixed;
-            bottom: 0px;
-            left: 0px;
-            width: 180px;
-            height: auto;
-            z-index: 1995;
-            pointer-events: none;
-            opacity: 0.8;
-        }
-
-        /* Director Smoke Canvas */
+        /* Director Smoke Canvas - BEHIND everything */
         .director-smoke {
             position: fixed;
             bottom: -30px;
@@ -743,12 +731,29 @@
             clip-path: polygon(0% 80%, 0% 0%, 20% 0%, 170% 200%);
             mix-blend-mode: normal;
             isolation: isolate;
+            transform: translateZ(-10px);
+            will-change: transform;
+        }
+
+        /* Director Set Image - Bottom Left - ON TOP of smoke */
+        .director-set {
+            position: fixed;
+            bottom: 0px;
+            left: 0px;
+            width: 180px;
+            height: auto;
+            z-index: 2000;
+            pointer-events: none;
+            opacity: 1;
+            transform: translateZ(10px);
+            isolation: isolate;
+            will-change: transform;
         }
 
         /* Webcam Settings Widget */
         .webcam-settings-widget {
             width: 220px;
-            height: 320px;
+            height: 640px;
             position: fixed;
             left: 75%;
             top: 20%;
@@ -935,17 +940,68 @@
             font-weight: 700;
         }
 
+        /* Webcam Sliders */
+        .webcam-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .webcam-slider {
+            flex: 1;
+            height: 6px;
+            background: #ECF0F1;
+            border-radius: 3px;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .webcam-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #E67E22;
+            border-radius: 50%;
+            border: 2px solid #2C3E50;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .webcam-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: #D35400;
+        }
+
+        .webcam-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #E67E22;
+            border-radius: 50%;
+            border: 2px solid #2C3E50;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .webcam-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+            background: #D35400;
+        }
+
         .webcam-format-selector {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 4px;
+            margin-top: 6px;
         }
 
         .format-option {
+            width: 46px;
+            height: 46px;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            padding: 6px;
+            justify-content: center;
+            padding: 0;
             border: 2px solid #BDC3C7;
             border-radius: 6px;
             cursor: pointer;
@@ -964,11 +1020,11 @@
         }
 
         .format-preview {
-            width: 24px;
-            height: 16px;
+            width: 28px;
+            height: 20px;
             background: #7BC3D1;
             border: 1px solid #2C3E50;
-            margin-bottom: 4px;
+            margin-bottom: 0;
         }
 
         .format-preview.landscape {
@@ -1019,6 +1075,503 @@
             font-size: 8px;
             font-weight: bold;
             color: #2C3E50;
+        }
+
+        /* Automation Selector */
+        .automation-selector {
+            display: flex;
+            gap: 4px;
+            justify-content: space-between;
+            margin-top: 6px;
+        }
+
+        .automation-option {
+            width: 62px;
+            height: 62px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 4px;
+            border: 2px solid #BDC3C7;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #F8F9FA;
+        }
+
+        .automation-option:hover {
+            border-color: #E67E22;
+            background: #FDF2E9;
+        }
+
+        .automation-option.active {
+            border-color: #E67E22;
+            background: #FDF2E9;
+            box-shadow: 0 2px 4px rgba(230, 126, 34, 0.2);
+        }
+
+        .automation-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .automation-option span {
+            font-size: 8px;
+            font-weight: bold;
+            color: #2C3E50;
+            text-align: center;
+        }
+
+        /* Automation Settings Panel */
+        .automation-settings-panel {
+            margin-top: 10px;
+            padding: 10px;
+            background: #F8F9FA;
+            border: 2px solid #E67E22;
+            border-radius: 6px;
+        }
+
+        .automation-direction {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .direction-option {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+            border: 2px solid #BDC3C7;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .direction-option:hover {
+            border-color: #E67E22;
+            background: #FDF2E9;
+        }
+
+        .direction-option input[type="radio"] {
+            display: none;
+        }
+
+        .direction-option input[type="radio"]:checked + .direction-label {
+            font-weight: bold;
+        }
+
+        .direction-option:has(input[type="radio"]:checked) {
+            border-color: #E67E22;
+            background: #FDF2E9;
+        }
+
+        .direction-label {
+            font-size: 9px;
+            font-weight: 600;
+            color: #2C3E50;
+            text-align: center;
+        }
+
+        .automation-inputs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .automation-input-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .automation-input-label {
+            font-size: 9px;
+            font-weight: bold;
+            color: #2C3E50;
+        }
+
+        .automation-input {
+            width: 100%;
+            padding: 4px 6px;
+            border: 2px solid #BDC3C7;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #2C3E50;
+            text-align: center;
+            background: white;
+            cursor: ns-resize;
+        }
+
+        .automation-input:focus {
+            outline: none;
+            border-color: #E67E22;
+        }
+
+        /* Remove spinner arrows */
+        .automation-input::-webkit-inner-spin-button,
+        .automation-input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .automation-input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .automation-input-unit {
+            font-size: 8px;
+            font-weight: bold;
+            color: #7F8C8D;
+        }
+
+        .automation-info {
+            text-align: center;
+            margin-bottom: 8px;
+            padding: 6px;
+            background: #E8F8F5;
+            border-radius: 4px;
+        }
+
+        .automation-info-text {
+            font-size: 9px;
+            font-weight: bold;
+            color: #27AE60;
+        }
+
+        .automation-slider {
+            width: 100%;
+            height: 4px;
+            background: #ECF0F1;
+            border-radius: 2px;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .automation-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #E67E22;
+            border-radius: 50%;
+            border: 2px solid #2C3E50;
+            cursor: pointer;
+        }
+
+        .automation-slider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            background: #E67E22;
+            border-radius: 50%;
+            border: 2px solid #2C3E50;
+            cursor: pointer;
+        }
+
+        .background-section {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 2px solid #ECF0F1;
+        }
+
+        .background-upload {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .background-preview {
+            width: 100%;
+            height: 80px;
+            background: #ECF0F1;
+            border: 2px dashed #BDC3C7;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .background-preview:hover {
+            border-color: #E67E22;
+            background: #FDF2E9;
+        }
+
+        .background-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .background-placeholder {
+            font-size: 10px;
+            color: #7F8C8D;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .background-toggle-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+            margin-top: 8px;
+        }
+
+        .background-toggle-track {
+            width: 40px;
+            height: 20px;
+            background: #ECF0F1;
+            border-radius: 10px;
+            border: 1px solid #BDC3C7;
+            position: relative;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .background-toggle-track:hover {
+            border-color: #2C3E50;
+        }
+
+        .background-toggle-thumb {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: #3498DB;
+            border-radius: 50%;
+            border: 1px solid #2C3E50;
+            left: 2px;
+            top: 2px;
+            transition: left 0.3s ease;
+        }
+
+        .background-toggle-switch.active .background-toggle-thumb {
+            left: 22px;
+            background: #27AE60;
+        }
+
+        .background-toggle-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: #7F8C8D;
+            transition: color 0.2s ease;
+            flex: 1;
+            text-align: center;
+        }
+
+        .background-toggle-label.left {
+            text-align: left;
+        }
+
+        .background-toggle-label.right {
+            text-align: right;
+        }
+
+        .background-toggle-switch:not(.active) .background-toggle-label.left {
+            color: #2C3E50;
+            font-weight: 700;
+        }
+
+        .background-toggle-switch.active .background-toggle-label.right {
+            color: #2C3E50;
+            font-weight: 700;
+        }
+
+        .ai-status {
+            font-size: 9px;
+            color: #27AE60;
+            text-align: center;
+            margin-top: 4px;
+            font-weight: bold;
+        }
+
+        .ai-status.loading {
+            color: #F39C12;
+        }
+
+        .ai-status.error {
+            color: #E74C3C;
+        }
+
+        .background-editor-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .background-editor-modal.show {
+            display: flex;
+        }
+
+        .editor-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 2px solid #2C3E50;
+            max-width: 600px;
+            width: 90%;
+        }
+
+        .editor-header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ECF0F1;
+        }
+
+        .editor-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2C3E50;
+            margin-bottom: 5px;
+        }
+
+        .editor-subtitle {
+            font-size: 11px;
+            color: #7F8C8D;
+        }
+
+        .editor-preview-area {
+            width: 400px;
+            height: 400px;
+            max-width: 90vw;
+            max-height: 60vh;
+            background: #ECF0F1;
+            border: 2px solid #2C3E50;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            cursor: move;
+            margin: 0 auto 15px;
+        }
+
+        .editor-image {
+            position: absolute;
+            max-width: none;
+            max-height: none;
+            transform-origin: center center;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .editor-format-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 3px solid #E67E22;
+            pointer-events: none;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+        }
+
+        .editor-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .editor-control-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .editor-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #2C3E50;
+            min-width: 60px;
+        }
+
+        .editor-slider {
+            flex: 1;
+            height: 6px;
+            background: #ECF0F1;
+            border-radius: 3px;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .editor-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #E67E22;
+            border-radius: 50%;
+            border: 2px solid #2C3E50;
+            cursor: pointer;
+        }
+
+        .editor-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #E67E22;
+            border-radius: 50%;
+            border: 2px solid #2C3E50;
+            cursor: pointer;
+        }
+
+        .editor-value {
+            font-size: 11px;
+            font-weight: bold;
+            color: #2C3E50;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .editor-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .editor-btn {
+            flex: 1;
+            padding: 10px 20px;
+            border: 2px solid #2C3E50;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .editor-save-btn {
+            background: #27AE60;
+            color: white;
+        }
+
+        .editor-save-btn:hover {
+            background: #229954;
+            transform: translateY(-1px);
+        }
+
+        .editor-cancel-btn {
+            background: #E74C3C;
+            color: white;
+        }
+
+        .editor-cancel-btn:hover {
+            background: #C0392B;
+            transform: translateY(-1px);
         }
 
         /* Webcam Video Widget */
@@ -1095,6 +1648,22 @@
             height: 100%;
             object-fit: cover;
             border-radius: inherit;
+        }
+
+        .webcam-canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: inherit;
+            display: none;
+        }
+
+        .webcam-canvas.active {
+            display: block;
+        }
+
+        .webcam-video.background-active {
+            display: none;
         }
 
         .webcam-video-bandaid {
@@ -1591,36 +2160,21 @@
         
         <div class="webcam-settings-section">
             <label class="webcam-settings-label">Size</label>
-            <div class="webcam-toggle-switch" id="webcamSizeToggle">
-                <span class="webcam-toggle-label left">Small</span>
-                <div class="webcam-toggle-track">
-                    <div class="webcam-toggle-thumb"></div>
-                </div>
-                <span class="webcam-toggle-label right">Big</span>
+            <div class="webcam-slider-container">
+                <input type="range" class="webcam-slider" id="webcamSizeSlider" min="50" max="500" value="100" step="10">
+                <div class="slider-value" id="sizeValue">1.0x</div>
             </div>
         </div>
 
         <div class="webcam-settings-section">
             <label class="webcam-settings-label">Zoom</label>
-            <div class="webcam-toggle-switch" id="webcamZoomToggle">
-                <span class="webcam-toggle-label left">Normal</span>
-                <div class="webcam-toggle-track">
-                    <div class="webcam-toggle-thumb"></div>
-                </div>
-                <span class="webcam-toggle-label right">Zoom</span>
+            <div class="webcam-slider-container">
+                <input type="range" class="webcam-slider" id="webcamZoomSlider" min="100" max="500" value="100" step="10">
+                <div class="slider-value" id="zoomValue">1.0x</div>
             </div>
         </div>
 
-        <div class="webcam-settings-section">
-            <label class="webcam-settings-label">Float</label>
-            <div class="webcam-toggle-switch" id="webcamFloatToggle">
-                <span class="webcam-toggle-label left">Normal</span>
-                <div class="webcam-toggle-track">
-                    <div class="webcam-toggle-thumb"></div>
-                </div>
-                <span class="webcam-toggle-label right">PiP</span>
-            </div>
-        </div>
+
 
         <div class="webcam-settings-section">
             <label class="webcam-settings-label">Format</label>
@@ -1629,21 +2183,106 @@
         <div class="webcam-format-selector">
             <div class="format-option active" data-format="16:9">
                 <div class="format-preview landscape"></div>
-                <span>16:9</span>
             </div>
             <div class="format-option" data-format="9:16">
                 <div class="format-preview portrait"></div>
-                <span>9:16</span>
             </div>
             <div class="format-option" data-format="round">
                 <div class="format-preview circle"></div>
-                <span>Round</span>
             </div>
             <div class="format-option" data-format="random">
                 <div class="format-preview random"></div>
-                <span>Random</span>
             </div>
         </div>
+
+        <div class="webcam-settings-section">
+            <label class="webcam-settings-label">Automation</label>
+        </div>
+
+        <div class="automation-selector">
+            <div class="automation-option" data-automation="dramatic">
+                <div class="automation-icon">📹</div>
+                <span>Dramatic<br>Zoom</span>
+            </div>
+            <div class="automation-option" data-automation="dynamic">
+                <div class="automation-icon">📐</div>
+                <span>Dynamic<br>Size</span>
+            </div>
+            <div class="automation-option" data-automation="random">
+                <div class="automation-icon">🎲</div>
+                <span>Random<br>Action</span>
+            </div>
+        </div>
+
+        <!-- Dramatic Zoom Settings Panel -->
+        <div class="automation-settings-panel" id="dramaticZoomPanel" style="display: none;">
+            <div class="automation-direction">
+                <label class="direction-option">
+                    <input type="radio" name="zoomDirection" value="in" checked>
+                    <span class="direction-label">Zoom IN ↗️</span>
+                </label>
+                <label class="direction-option">
+                    <input type="radio" name="zoomDirection" value="out">
+                    <span class="direction-label">Zoom OUT ↘️</span>
+                </label>
+            </div>
+            
+            <div class="automation-inputs">
+                <div class="automation-input-group">
+                    <label class="automation-input-label">Target</label>
+                    <input type="number" class="automation-input" id="dramaticTarget" min="1.0" max="5.0" step="0.1" value="5.0">
+                    <span class="automation-input-unit">x</span>
+                </div>
+                <div class="automation-input-group">
+                    <label class="automation-input-label">Duration</label>
+                    <input type="number" class="automation-input" id="dramaticDuration" min="5" max="300" step="5" value="30">
+                    <span class="automation-input-unit">sec</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Dynamic Size Settings Panel -->
+        <div class="automation-settings-panel" id="dynamicSizePanel" style="display: none;">
+            <div class="automation-info">
+                <span class="automation-info-text">🎤 Voice Reactive Size</span>
+            </div>
+            
+            <div class="automation-inputs">
+                <div class="automation-input-group">
+                    <label class="automation-input-label">Max Size</label>
+                    <input type="number" class="automation-input" id="dynamicMaxSize" min="0.5" max="5.0" step="0.1" value="3.0">
+                    <span class="automation-input-unit">x</span>
+                </div>
+                <div class="automation-input-group">
+                    <label class="automation-input-label">Sensitivity</label>
+                    <input type="range" class="automation-slider" id="dynamicSensitivity" min="1" max="10" step="1" value="5">
+                    <span class="automation-input-unit" id="sensitivityValue">5</span>
+                </div>
+            </div>
+        </div>
+
+            <div class="webcam-settings-section background-section">
+                <label class="webcam-settings-label">Background</label>
+                
+                <div class="background-upload">
+                    <div class="background-preview" id="backgroundPreview">
+                        <div class="background-placeholder">Click to upload<br>background image</div>
+                    </div>
+                    <input type="file" id="backgroundFileInput" accept="image/*" style="display: none;">
+                </div>
+
+                <div class="background-toggle-switch" id="backgroundToggle">
+                    <span class="background-toggle-label left">OFF</span>
+                    <div class="background-toggle-track">
+                        <div class="background-toggle-thumb"></div>
+                    </div>
+                    <span class="background-toggle-label right">AI ON</span>
+                </div>
+
+                <div class="ai-status" id="aiStatus">AI Ready</div>
+            </div>
+    </div>
     </div>
 
     <!-- Webcam Video Widget -->
@@ -1651,6 +2290,7 @@
         <div class="webcam-video-bandaid" id="webcamVideoBandaid"></div>
         <div class="webcam-container" id="webcamContainer">
             <video class="webcam-video" id="webcamVideo" autoplay muted playsinline></video>
+            <canvas class="webcam-canvas" id="webcamCanvas"></canvas>
         </div>
     </div>
 
@@ -1712,6 +2352,34 @@
         </div>
     </div>
 
+    <!-- Background Editor Modal -->
+    <div class="background-editor-modal" id="backgroundEditorModal">
+        <div class="editor-container">
+            <div class="editor-header">
+                <div class="editor-title">Background Editor</div>
+                <div class="editor-subtitle">Pan & Zoom to fit your webcam format</div>
+            </div>
+
+            <div class="editor-preview-area" id="editorPreviewArea">
+                <img class="editor-image" id="editorImage">
+                <div class="editor-format-overlay" id="editorFormatOverlay"></div>
+            </div>
+
+            <div class="editor-controls">
+                <div class="editor-control-row">
+                    <span class="editor-label">Zoom</span>
+                    <input type="range" class="editor-slider" id="editorZoomSlider" min="50" max="300" value="100">
+                    <span class="editor-value" id="editorZoomValue">1.0x</span>
+                </div>
+            </div>
+
+            <div class="editor-buttons">
+                <button class="editor-btn editor-cancel-btn" onclick="closeBackgroundEditor()">Cancel</button>
+                <button class="editor-btn editor-save-btn" onclick="saveBackgroundEdit()">Save</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Copyright -->
     <div class="copyright">94tch © 2025</div>
     
@@ -1737,6 +2405,7 @@
     <canvas class="underwater-effect" id="underwaterCanvas"></canvas>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation"></script>
     <script>
         let state = 'idle';
         let mediaRecorder = null;
@@ -1762,6 +2431,8 @@
         let dragTarget = null;
         let justFinishedDragging = false;
         let mouseHasLeft = { copat: true, avs: true, webcamSettings: true, webcamVideo: true, audioSettings: true };
+        let rafId = null;
+        let currentMousePos = { x: 0, y: 0 };
 
         // Copat widget drag - body and bandaid
         copatBody.addEventListener('mousedown', (e) => startDrag(e, 'copat'));
@@ -1870,6 +2541,10 @@
             dragOffset.x = e.clientX - rect.left;
             dragOffset.y = e.clientY - rect.top;
             
+            // Store initial mouse position
+            currentMousePos.x = e.clientX;
+            currentMousePos.y = e.clientY;
+            
             // Clear transform before setting position to avoid jump for all widgets
             if (type === 'avs' || type === 'copat' || type === 'webcamSettings' || type === 'webcamVideo' || type === 'audioSettings') {
                 targetWidget.style.transform = 'none';
@@ -1879,11 +2554,28 @@
             
             targetWidget.style.position = 'fixed';
             targetWidget.style.zIndex = '9999';
+            targetWidget.style.transition = 'none';
+            
+            // Start smooth animation loop
+            if (!rafId) {
+                rafId = requestAnimationFrame(smoothDrag);
+            }
         }
 
         function drag(e) {
             if (!isDragging || !dragTarget) return;
             e.preventDefault();
+            
+            // Just update mouse position, let RAF handle the actual movement
+            currentMousePos.x = e.clientX;
+            currentMousePos.y = e.clientY;
+        }
+        
+        function smoothDrag() {
+            if (!isDragging || !dragTarget) {
+                rafId = null;
+                return;
+            }
             
             let targetWidget;
             if (dragTarget === 'copat') {
@@ -1898,10 +2590,14 @@
                 targetWidget = document.getElementById('audioSettingsWidget');
             }
             
-            const newLeft = (e.clientX - dragOffset.x) + 'px';
-            const newTop = (e.clientY - dragOffset.y) + 'px';
-            targetWidget.style.left = newLeft;
-            targetWidget.style.top = newTop;
+            if (targetWidget) {
+                const newLeft = (currentMousePos.x - dragOffset.x) + 'px';
+                const newTop = (currentMousePos.y - dragOffset.y) + 'px';
+                targetWidget.style.left = newLeft;
+                targetWidget.style.top = newTop;
+            }
+            
+            rafId = requestAnimationFrame(smoothDrag);
         }
 
         function stopDrag() {
@@ -1947,6 +2643,13 @@
                     mouseHasLeft[dragTarget] = false;
                 }
             }
+            
+            // Stop RAF loop
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+                rafId = null;
+            }
+            
             isDragging = false;
             dragTarget = null;
         }
@@ -2058,7 +2761,10 @@
             console.log('startRecording called');
             try {
                 const quality = document.getElementById('qualityToggle').classList.contains('active') ? '4k' : '1080p';
+                const audioToggle = document.getElementById('audioToggle');
+                const hasAudio = audioToggle.classList.contains('active') && audioStream;
                 
+                // Video constraints
                 const videoConstraints = {
                     mediaSource: 'screen',
                     displaySurface: 'monitor',
@@ -2074,96 +2780,125 @@
                     videoConstraints.height = { ideal: 1080 };
                 }
                 
-                const videoStream = await navigator.mediaDevices.getDisplayMedia({
+                // Get screen recording with audio if needed
+                const displayMediaOptions = {
                     video: videoConstraints,
-                    audio: false,
+                    audio: hasAudio ? {
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false,
+                        sampleRate: 48000,
+                        channelCount: 2
+                    } : false,
                     autoSelectAllScreens: true,
                     surfaceSwitching: 'exclude',
                     selfBrowserSurface: 'exclude'
-                });
+                };
+                
+                const videoStream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
                 console.log('Video stream obtained:', videoStream);
                 
-                // Create combined stream with audio if active
-                let combinedStream = videoStream;
-                const audioToggle = document.getElementById('audioToggle');
+                // PHASE 1: Collect video track
+                const videoTrack = videoStream.getVideoTracks()[0];
+                const collectedAudioTracks = [];
                 
-                if (audioToggle.classList.contains('active') && audioStream) {
-                    console.log('Adding audio to recording...');
+                // PHASE 2: Process microphone audio with delay compensation
+                if (hasAudio && audioStream) {
+                    console.log('Processing microphone audio with sync delay...');
                     
-                    // Create new MediaStream with video + audio tracks
-                    combinedStream = new MediaStream();
-                    
-                    // Add video tracks
-                    videoStream.getVideoTracks().forEach(track => {
-                        combinedStream.addTrack(track);
-                    });
-                    
-                    // Add audio tracks
-                    audioStream.getAudioTracks().forEach(track => {
-                        combinedStream.addTrack(track);
-                    });
-                    
-                    console.log('Combined stream created with video + audio');
-                } else {
-                    console.log('Recording video only');
+                    const audioTracks = audioStream.getAudioTracks();
+                    if (audioTracks.length > 0 && audioTracks[0].readyState === 'live') {
+                        // Create Web Audio context for delay processing
+                        const syncAudioContext = new (window.AudioContext || window.webkitAudioContext)({
+                            sampleRate: 48000
+                        });
+                        
+                        // Create source from microphone stream
+                        const micStream = new MediaStream([audioTracks[0]]);
+                        const source = syncAudioContext.createMediaStreamSource(micStream);
+                        
+                        // Create delay node - 150ms to compensate for video encoding delay
+                        const delayNode = syncAudioContext.createDelay(1.0);
+                        delayNode.delayTime.value = 0.225; // 225ms delay
+                        
+                        // Create destination for delayed audio
+                        const destination = syncAudioContext.createMediaStreamDestination();
+                        
+                        // Connect: source -> delay -> destination
+                        source.connect(delayNode);
+                        delayNode.connect(destination);
+                        
+                        // Get delayed audio track
+                        const delayedAudioTrack = destination.stream.getAudioTracks()[0];
+                        collectedAudioTracks.push(delayedAudioTrack);
+                        
+                        console.log('Microphone audio delayed by 150ms for sync');
+                    } else {
+                        console.warn('Microphone audio not ready');
+                    }
                 }
                 
-                const stream = combinedStream;
-
-                // Check if we have audio and choose appropriate codec
-                const hasAudio = audioToggle.classList.contains('active') && audioStream;
-                let options = {};
+                // Collect system audio if available from screen capture (no delay needed)
+                const systemAudioTracks = videoStream.getAudioTracks();
+                if (systemAudioTracks.length > 0) {
+                    collectedAudioTracks.push(systemAudioTracks[0]);
+                    console.log('System audio track collected (no delay)');
+                }
                 
-                if (hasAudio) {
-                    // For audio + video, prefer VP9 or fallback to basic WebM
+                // PHASE 3: Create unified stream with synced tracks
+                const recordingStream = new MediaStream();
+                recordingStream.addTrack(videoTrack);
+                collectedAudioTracks.forEach(track => {
+                    recordingStream.addTrack(track);
+                });
+                
+                console.log('Unified stream created with', recordingStream.getTracks().length, 'tracks (audio delayed for sync)');
+
+                // Choose codec based on what we're recording
+                let options = {};
+                const streamHasAudio = recordingStream.getAudioTracks().length > 0;
+                
+                if (streamHasAudio) {
+                    // Audio + video recording
                     if (MediaRecorder.isTypeSupported('video/webm; codecs="vp9,opus"')) {
                         options = {
                             mimeType: 'video/webm; codecs="vp9,opus"',
-                            videoBitsPerSecond: quality === '4k' ? 15000000 : 8000000,
+                            videoBitsPerSecond: quality === '4k' ? 12000000 : 6000000,
                             audioBitsPerSecond: 128000
                         };
                         console.log('Recording with VP9 + Opus codec');
                     } else if (MediaRecorder.isTypeSupported('video/webm; codecs="vp8,opus"')) {
                         options = {
                             mimeType: 'video/webm; codecs="vp8,opus"',
-                            videoBitsPerSecond: quality === '4k' ? 12000000 : 6000000,
-                            audioBitsPerSecond: 128000
-                        };
-                        console.log('Recording with VP8 + Opus codec');
-                    } else if (MediaRecorder.isTypeSupported('video/webm')) {
-                        options = {
-                            mimeType: 'video/webm',
                             videoBitsPerSecond: quality === '4k' ? 10000000 : 5000000,
                             audioBitsPerSecond: 128000
                         };
-                        console.log('Recording with default WebM + audio');
+                        console.log('Recording with VP8 + Opus codec');
                     } else {
-                        throw new Error('Browser does not support audio recording with WebM');
+                        options = {
+                            mimeType: 'video/webm',
+                            videoBitsPerSecond: quality === '4k' ? 8000000 : 4000000
+                        };
+                        console.log('Recording with basic WebM codec');
                     }
                 } else {
-                    // Video only - use existing logic
+                    // Video only recording
                     if (MediaRecorder.isTypeSupported('video/webm; codecs="vp9"')) {
                         options = {
                             mimeType: 'video/webm; codecs="vp9"',
                             videoBitsPerSecond: quality === '4k' ? 15000000 : 8000000
                         };
                         console.log('Recording with VP9 codec (video only)');
-                    } else if (MediaRecorder.isTypeSupported('video/webm; codecs="vp8"')) {
-                        options = {
-                            mimeType: 'video/webm; codecs="vp8"',
-                            videoBitsPerSecond: quality === '4k' ? 12000000 : 6000000
-                        };
-                        console.log('Recording with VP8 codec (video only)');
                     } else {
                         options = {
                             mimeType: 'video/webm',
                             videoBitsPerSecond: quality === '4k' ? 10000000 : 5000000
                         };
-                        console.log('Recording with default WebM (video only)');
+                        console.log('Recording with basic WebM (video only)');
                     }
                 }
 
-                mediaRecorder = new MediaRecorder(stream, options);
+                mediaRecorder = new MediaRecorder(recordingStream, options);
                 console.log('MediaRecorder created with:', options.mimeType);
 
                 recordedChunks = [];
@@ -2175,9 +2910,20 @@
                     }
                 });
 
-                // Record in smaller chunks for better seeking
-                mediaRecorder.start(1000); // 1-second chunks
-                console.log('MediaRecorder started with 1s chunks');
+                mediaRecorder.addEventListener('stop', () => {
+                    console.log('MediaRecorder stopped, total chunks:', recordedChunks.length);
+                });
+
+                mediaRecorder.addEventListener('error', (event) => {
+                    console.error('MediaRecorder error:', event.error);
+                    alert('Recording error: ' + event.error.message);
+                    resetToIdle();
+                });
+
+                // Use longer chunks when recording audio to prevent sync issues
+                const chunkSize = streamHasAudio ? 5000 : 1000;
+                mediaRecorder.start(chunkSize);
+                console.log('MediaRecorder started with', chunkSize + 'ms chunks');
                 
                 // Update Copat for recording
                 state = 'recording';
@@ -2191,6 +2937,12 @@
                 startTime = Date.now();
                 updateTimer();
                 timerInterval = setInterval(updateTimer, 1000);
+
+                // Start dramatic zoom if active
+                startDramaticZoomIfActive();
+
+                // Start dynamic size if active
+                startDynamicSizeIfActive();
 
             } catch (err) {
                 console.error('Error starting recording:', err);
@@ -2211,10 +2963,24 @@
         function stopRecording() {
             if (mediaRecorder && mediaRecorder.state === 'recording') {
                 mediaRecorder.stop();
-                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                // Don't stop tracks immediately - wait for recording to finish
+                setTimeout(() => {
+                    if (mediaRecorder && mediaRecorder.stream) {
+                        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                    }
+                }, 1000);
             }
             
             clearInterval(timerInterval);
+            
+            // Stop dramatic zoom if active
+            stopDramaticZoom();
+
+            // Stop dynamic size if active
+            stopDynamicSize();
+
+            // Stop random action if active
+            stopRandomAction();
             
             state = 'stopped';
             copatHead.classList.remove('recording');
@@ -2228,7 +2994,31 @@
         }
 
         function saveVideo() {
-            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            // Check if we have valid recorded chunks
+            if (!recordedChunks || recordedChunks.length === 0) {
+                alert('No recording data found. Please try recording again.');
+                return;
+            }
+            
+            console.log('Saving video with', recordedChunks.length, 'chunks');
+            console.log('Total size:', recordedChunks.reduce((sum, chunk) => sum + chunk.size, 0), 'bytes');
+            
+            // Determine correct MIME type based on what was actually recorded
+            let mimeType = 'video/webm';
+            if (mediaRecorder && mediaRecorder.mimeType) {
+                mimeType = mediaRecorder.mimeType;
+                console.log('Using recorder MIME type:', mimeType);
+            }
+            
+            const blob = new Blob(recordedChunks, { type: mimeType });
+            
+            // Validate blob size
+            if (blob.size === 0) {
+                alert('Recording file is empty. Please try recording again.');
+                return;
+            }
+            
+            console.log('Created blob:', blob.size, 'bytes, type:', blob.type);
             
             // Show progress animation
             displayText.textContent = 'SAVING...';
@@ -2240,42 +3030,51 @@
             progressBar.className = 'progress-bar';
             copatBody.appendChild(progressBar);
             
-            // Animate progress bar
-            let progress = 0;
-            const progressInterval = setInterval(() => {
-                progress += Math.random() * 15 + 5; // Random progress between 5-20%
-                if (progress > 95) {
-                    progress = 95;
-                    clearInterval(progressInterval);
+            // Faster, simpler download without fake progress
+            setTimeout(() => {
+                progressBar.style.width = '100%';
+                displayText.textContent = 'DOWNLOADING...';
+                
+                try {
+                    // Create download immediately
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `copatcher-recording-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.webm`;
                     
-                    // Finish up
+                    // Force download
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    // Cleanup
                     setTimeout(() => {
-                        progress = 100;
-                        progressBar.style.width = progress + '%';
-                        displayText.textContent = 'FINALIZING...';
-                        
-                        setTimeout(() => {
-                            // Actually download the file
-                            const url = URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = url;
-                            a.download = `copatcher-recording-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.webm`;
-                            a.click();
-                            URL.revokeObjectURL(url);
-                            
-                            // Cleanup and reset
-                            displayText.textContent = 'SAVED!';
-                            setTimeout(() => {
-                                copatBody.classList.remove('processing');
-                                copatBody.removeChild(progressBar);
-                                dialog.classList.remove('show');
-                                resetToIdle();
-                            }, 1000);
-                        }, 800);
-                    }, 500);
+                        URL.revokeObjectURL(url);
+                    }, 1000);
+                    
+                    displayText.textContent = 'SAVED!';
+                    setTimeout(() => {
+                        copatBody.classList.remove('processing');
+                        if (progressBar.parentNode) {
+                            copatBody.removeChild(progressBar);
+                        }
+                        dialog.classList.remove('show');
+                        resetToIdle();
+                    }, 1000);
+                    
+                } catch (downloadError) {
+                    console.error('Download failed:', downloadError);
+                    alert('Download failed: ' + downloadError.message);
+                    
+                    // Cleanup on error
+                    copatBody.classList.remove('processing');
+                    if (progressBar.parentNode) {
+                        copatBody.removeChild(progressBar);
+                    }
+                    dialog.classList.remove('show');
+                    resetToIdle();
                 }
-                progressBar.style.width = progress + '%';
-            }, 150);
+            }, 500);
         }
         
         async function initFFmpeg() {
@@ -2440,6 +3239,281 @@
             displayText.className = '';
             displayText.textContent = 'READY';
             startTime = null;
+            
+            // Stop dramatic zoom if active
+            stopDramaticZoom();
+
+            // Stop dynamic size if active
+            stopDynamicSize();
+        }
+
+        function startDramaticZoomIfActive() {
+            // Check if dramatic zoom box is active
+            const dramaticOption = document.querySelector('.automation-option[data-automation="dramatic"]');
+            if (!dramaticOption || !dramaticOption.classList.contains('active')) {
+                return;
+            }
+
+            // Get settings from panel
+            const direction = document.querySelector('input[name="zoomDirection"]:checked').value;
+            const targetInput = document.getElementById('dramaticTarget');
+            const durationInput = document.getElementById('dramaticDuration');
+            
+            if (!targetInput || !durationInput) {
+                console.error('Dramatic zoom inputs not found');
+                return;
+            }
+
+            const targetZoom = parseFloat(targetInput.value);
+            const duration = parseFloat(durationInput.value) * 1000; // Convert to milliseconds
+
+            // Set start values
+            dramaticZoomStartZoom = currentWebcamZoom;
+            dramaticZoomTargetZoom = targetZoom;
+            dramaticZoomDuration = duration;
+            dramaticZoomStartTime = Date.now();
+            dramaticZoomActive = true;
+
+            console.log(`Starting dramatic zoom ${direction}: ${dramaticZoomStartZoom}x → ${dramaticZoomTargetZoom}x over ${duration/1000}s`);
+
+            // Start animation loop
+            dramaticZoomInterval = setInterval(() => {
+                const elapsed = Date.now() - dramaticZoomStartTime;
+                const progress = Math.min(elapsed / dramaticZoomDuration, 1.0); // 0 to 1
+
+                // Calculate current zoom based on direction
+                let newZoom;
+                if (direction === 'in') {
+                    // Zoom IN: start → target
+                    newZoom = dramaticZoomStartZoom + (dramaticZoomTargetZoom - dramaticZoomStartZoom) * progress;
+                } else {
+                    // Zoom OUT: start → target (target should be lower than start)
+                    newZoom = dramaticZoomStartZoom + (dramaticZoomTargetZoom - dramaticZoomStartZoom) * progress;
+                }
+
+                // Apply zoom
+                currentWebcamZoom = newZoom;
+                applyWebcamZoom();
+
+                // Update slider to reflect automation
+                const zoomSlider = document.getElementById('webcamZoomSlider');
+                const zoomValue = document.getElementById('zoomValue');
+                if (zoomSlider && zoomValue) {
+                    zoomSlider.value = Math.round(newZoom * 100);
+                    zoomValue.textContent = newZoom.toFixed(1) + 'x';
+                }
+
+                // Stop when done
+                if (progress >= 1.0) {
+                    stopDramaticZoom();
+                    console.log('Dramatic zoom complete');
+                }
+            }, 50); // Update every 50ms for smooth animation
+        }
+
+        function stopDramaticZoom() {
+            if (dramaticZoomInterval) {
+                clearInterval(dramaticZoomInterval);
+                dramaticZoomInterval = null;
+            }
+            dramaticZoomActive = false;
+            dramaticZoomStartTime = null;
+        }
+
+        function startDynamicSizeIfActive() {
+            // Check if dynamic size box is active
+            const dynamicOption = document.querySelector('.automation-option[data-automation="dynamic"]');
+            if (!dynamicOption || !dynamicOption.classList.contains('active')) {
+                return;
+            }
+
+            // Check if audio is active - but DON'T require recording to be active
+            if (!audioAnalyser) {
+                console.error('Dynamic size requires audio to be enabled');
+                alert('Please enable Audio Recording to use voice-reactive size!');
+                return;
+            }
+
+            // If already running, don't start again
+            if (dynamicSizeActive) {
+                console.log('Dynamic size already active');
+                return;
+            }
+
+            // Get settings from panel
+            const maxSizeInput = document.getElementById('dynamicMaxSize');
+            const sensitivityInput = document.getElementById('dynamicSensitivity');
+            
+            if (!maxSizeInput || !sensitivityInput) {
+                console.error('Dynamic size inputs not found');
+                return;
+            }
+
+            const maxSize = parseFloat(maxSizeInput.value);
+            const sensitivity = parseFloat(sensitivityInput.value);
+
+            // Set min size to current size slider value
+            dynamicSizeMinSize = currentWebcamSize;
+            dynamicSizeMaxSize = maxSize;
+            dynamicSizeSensitivity = sensitivity;
+            dynamicSizeActive = true;
+
+            console.log(`Starting dynamic size: ${dynamicSizeMinSize.toFixed(1)}x → ${dynamicSizeMaxSize.toFixed(1)}x (sensitivity: ${sensitivity})`);
+
+            console.log(`Starting dynamic size in ${state === 'recording' ? 'RECORDING' : 'PREVIEW'} mode: ${dynamicSizeMinSize.toFixed(1)}x → ${dynamicSizeMaxSize.toFixed(1)}x (sensitivity: ${sensitivity})`);
+
+            // Start animation loop
+            const bufferLength = audioAnalyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            dynamicSizeInterval = setInterval(() => {
+                // Get audio level
+                audioAnalyser.getByteFrequencyData(dataArray);
+                
+                let sum = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    sum += dataArray[i];
+                }
+                const average = sum / bufferLength;
+                
+                // Normalize to 0-1 with AGGRESSIVE sensitivity boost
+                // Real mic levels rarely go above 80-100, so we normalize to that range
+                let level = (average / 80) * (sensitivity / 3); // Much more aggressive!
+                level = Math.min(1.0, level); // Cap at 1.0
+                
+                // Map level to size range
+                const newSize = dynamicSizeMinSize + (dynamicSizeMaxSize - dynamicSizeMinSize) * level;
+                
+                // Apply size
+                currentWebcamSize = newSize;
+                applyWebcamFormat(currentWebcamFormat);
+                
+                // Update slider to reflect automation
+                const sizeSlider = document.getElementById('webcamSizeSlider');
+                const sizeValue = document.getElementById('sizeValue');
+                if (sizeSlider && sizeValue) {
+                    sizeSlider.value = Math.round(newSize * 100);
+                    sizeValue.textContent = newSize.toFixed(1) + 'x';
+                }
+            }, 50); // Update every 50ms for smooth reaction
+        }
+
+        function stopDynamicSize() {
+            if (dynamicSizeInterval) {
+                clearInterval(dynamicSizeInterval);
+                dynamicSizeInterval = null;
+            }
+            dynamicSizeActive = false;
+        }
+
+        function startRandomActionIfActive() {
+            // Check if random action box is active
+            const randomOption = document.querySelector('.automation-option[data-automation="random"]');
+            if (!randomOption || !randomOption.classList.contains('active')) {
+                return;
+            }
+
+            // If already running, don't start again
+            if (randomActionActive) {
+                console.log('Random action already active');
+                return;
+            }
+
+            randomActionActive = true;
+            
+            // Initialize current values
+            randomSizeCurrent = currentWebcamSize;
+            randomZoomCurrent = currentWebcamZoom;
+            
+            // Set first random targets
+            pickNewRandomTargets();
+
+            console.log('Starting RANDOM ACTION mode - unpredictable chaos! 🎲');
+
+            // Animation loop
+            randomActionInterval = setInterval(() => {
+                // Move size towards target
+                const sizeDiff = randomSizeTarget - randomSizeCurrent;
+                if (Math.abs(sizeDiff) > 0.01) {
+                    randomSizeCurrent += sizeDiff * randomSizeSpeed;
+                } else {
+                    // Reached target, pick new one
+                    pickNewRandomTargets();
+                }
+
+                // Move zoom towards target
+                const zoomDiff = randomZoomTarget - randomZoomCurrent;
+                if (Math.abs(zoomDiff) > 0.01) {
+                    randomZoomCurrent += zoomDiff * randomZoomSpeed;
+                } else {
+                    // Sometimes pick new target even if size hasn't reached yet
+                    if (Math.random() > 0.7) {
+                        pickNewRandomTargets();
+                    }
+                }
+
+                // Apply values
+                currentWebcamSize = randomSizeCurrent;
+                currentWebcamZoom = randomZoomCurrent;
+                
+                applyWebcamFormat(currentWebcamFormat);
+                applyWebcamZoom();
+
+                // Update sliders to show automation
+                const sizeSlider = document.getElementById('webcamSizeSlider');
+                const zoomSlider = document.getElementById('webcamZoomSlider');
+                const sizeValue = document.getElementById('sizeValue');
+                const zoomValue = document.getElementById('zoomValue');
+                
+                if (sizeSlider && sizeValue) {
+                    sizeSlider.value = Math.round(randomSizeCurrent * 100);
+                    sizeValue.textContent = randomSizeCurrent.toFixed(1) + 'x';
+                }
+                
+                if (zoomSlider && zoomValue) {
+                    zoomSlider.value = Math.round(randomZoomCurrent * 100);
+                    zoomValue.textContent = randomZoomCurrent.toFixed(1) + 'x';
+                }
+
+            }, 50); // 20fps updates
+        }
+
+        function pickNewRandomTargets() {
+            // Random size between 0.5x and 3.0x
+            randomSizeTarget = 0.5 + Math.random() * 2.5;
+            
+            // Random zoom between 1.0x and 3.0x
+            randomZoomTarget = 1.0 + Math.random() * 2.0;
+            
+            // Random speeds - sometimes fast, sometimes slow, sometimes CRAZY fast
+            const speedRoll = Math.random();
+            if (speedRoll > 0.9) {
+                // 10% chance: LIGHTNING speed
+                randomSizeSpeed = 0.15 + Math.random() * 0.15; // 0.15-0.3
+                randomZoomSpeed = 0.15 + Math.random() * 0.15;
+            } else if (speedRoll > 0.6) {
+                // 30% chance: Fast
+                randomSizeSpeed = 0.08 + Math.random() * 0.07; // 0.08-0.15
+                randomZoomSpeed = 0.08 + Math.random() * 0.07;
+            } else if (speedRoll > 0.3) {
+                // 30% chance: Medium
+                randomSizeSpeed = 0.04 + Math.random() * 0.04; // 0.04-0.08
+                randomZoomSpeed = 0.04 + Math.random() * 0.04;
+            } else {
+                // 30% chance: Slow and smooth
+                randomSizeSpeed = 0.01 + Math.random() * 0.03; // 0.01-0.04
+                randomZoomSpeed = 0.01 + Math.random() * 0.03;
+            }
+
+            console.log(`🎲 New random targets: size ${randomSizeCurrent.toFixed(2)} → ${randomSizeTarget.toFixed(2)} @ ${randomSizeSpeed.toFixed(3)}x speed, zoom ${randomZoomCurrent.toFixed(2)} → ${randomZoomTarget.toFixed(2)} @ ${randomZoomSpeed.toFixed(3)}x speed`);
+        }
+
+        function stopRandomAction() {
+            if (randomActionInterval) {
+                clearInterval(randomActionInterval);
+                randomActionInterval = null;
+            }
+            randomActionActive = false;
         }
 
         // Add event listeners when page loads
@@ -2525,6 +3599,86 @@
             
             // Initialize webcam format selector
             initWebcamFormatSelector();
+            
+            // Initialize automation boxes
+            const automationOptions = document.querySelectorAll('.automation-option');
+            const dramaticZoomPanel = document.getElementById('dramaticZoomPanel');
+            const dynamicSizePanel = document.getElementById('dynamicSizePanel');
+            
+            console.log('Automation options found:', automationOptions.length);
+            console.log('Dramatic zoom panel:', dramaticZoomPanel);
+            
+            automationOptions.forEach(option => {
+                option.addEventListener('click', (e) => {
+                    console.log('Automation box clicked!');
+                    e.stopPropagation();
+                    
+                    const automationType = option.getAttribute('data-automation');
+                    console.log('Automation type:', automationType);
+                    
+                    // Check if this box is already active
+                    const wasActive = option.classList.contains('active');
+                    console.log('Was active:', wasActive);
+                    
+                    // Remove active from all options
+                    automationOptions.forEach(opt => opt.classList.remove('active'));
+                    
+                    // Hide all panels
+                    if (dramaticZoomPanel) {
+                        dramaticZoomPanel.style.display = 'none';
+                    }
+                    if (dynamicSizePanel) {
+                        dynamicSizePanel.style.display = 'none';
+                    }
+                    
+                    // Stop any running automations when switching
+                    stopDramaticZoom();
+                    stopDynamicSize();
+                    stopRandomAction();
+                    
+                    // If it wasn't active before, activate it and show its panel
+                    if (!wasActive) {
+                        option.classList.add('active');
+                        console.log('Activated box:', automationType);
+                        
+                        // Show appropriate panel
+                        if (automationType === 'dramatic' && dramaticZoomPanel) {
+                            dramaticZoomPanel.style.display = 'block';
+                            console.log('Showing dramatic zoom panel');
+                        } else if (automationType === 'dynamic' && dynamicSizePanel) {
+                            dynamicSizePanel.style.display = 'block';
+                            console.log('Showing dynamic size panel');
+                            
+                            // Start dynamic size immediately in preview mode if audio is on
+                            if (isAudioActive && !dynamicSizeActive) {
+                                startDynamicSizeIfActive();
+                            }
+                        } else if (automationType === 'random') {
+                            console.log('Random action selected - pure chaos mode!');
+                            
+                            // Start random action immediately in preview mode if webcam is on
+                            const webcamToggle = document.getElementById('webcamToggle');
+                            if (webcamToggle && webcamToggle.classList.contains('active') && !randomActionActive) {
+                                startRandomActionIfActive();
+                            }
+                        }
+                    }
+                });
+            });
+
+            initBackgroundRemoval();
+
+            // Initialize draggable number inputs
+            initDraggableInputs();
+
+            // Initialize sensitivity slider
+            const sensitivitySlider = document.getElementById('dynamicSensitivity');
+            const sensitivityValue = document.getElementById('sensitivityValue');
+            if (sensitivitySlider && sensitivityValue) {
+                sensitivitySlider.addEventListener('input', function() {
+                    sensitivityValue.textContent = this.value;
+                });
+            }
             
             // Initialize FFmpeg
             initFFmpeg();
@@ -2716,8 +3870,6 @@
                     const webcamVideoWidget = document.getElementById('webcamVideoWidget');
                     const webcamVideo = document.getElementById('webcamVideo');
                     
-                    closePictureInPictureIfActive();
-                    
                     if (webcamStream) {
                         webcamStream.getTracks().forEach(track => track.stop());
                         webcamStream = null;
@@ -2730,12 +3882,6 @@
                     webcamSettingsWidget.style.display = 'none';
                     webcamVideoWidget.style.display = 'none';
                     webcamToggle.classList.remove('active');
-                    
-                    // Reset PiP state
-                    const floatToggle = document.getElementById('webcamFloatToggle');
-                    floatToggle.classList.remove('active');
-                    isPictureInPicture = false;
-                    pipWindow = null;
                 }
                 
             } else {
@@ -2902,11 +4048,19 @@
         // Director Smoke Effect 💨🎬
         function initDirectorSmoke() {
             const canvas = document.getElementById('directorSmokeCanvas');
+            
+            // Force canvas to stay behind
+            canvas.style.zIndex = '-1';
+            canvas.style.transform = 'translateZ(-10px)';
+            
             const scene = new THREE.Scene();
             const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
             const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
             renderer.setSize(800, 120);
             renderer.setClearColor(0x000000, 0);
+            
+            // Ensure renderer doesn't override z-index
+            renderer.domElement.style.zIndex = '-1';
 
             // Subtle smoke shader
             const smokeMaterial = new THREE.ShaderMaterial({
@@ -3011,11 +4165,50 @@
         // Webcam functionality
         let webcamStream = null;
         let currentWebcamFormat = '16:9';
-        let currentWebcamSize = 'small';
-        let currentWebcamZoom = 'normal';
+        let currentWebcamSize = 1.0; // Now a multiplier instead of 'small'/'big'
+        let currentWebcamZoom = 1.0; // Now a multiplier instead of 'normal'/'zoom'
         let currentRandomFormat = null;
-        let isPictureInPicture = false;
-        let pipWindow = null;
+
+        // Dramatic Zoom automation
+        let dramaticZoomActive = false;
+        let dramaticZoomInterval = null;
+        let dramaticZoomStartTime = null;
+        let dramaticZoomStartZoom = null;
+        let dramaticZoomTargetZoom = null;
+        let dramaticZoomDuration = null;
+
+        // Dynamic Size automation
+        let dynamicSizeActive = false;
+        let dynamicSizeInterval = null;
+        let dynamicSizeMinSize = null;
+        let dynamicSizeMaxSize = null;
+        let dynamicSizeSensitivity = null;
+
+        // Random Action automation
+        let randomActionActive = false;
+        let randomActionInterval = null;
+        let randomSizeTarget = 1.0;
+        let randomZoomTarget = 1.0;
+        let randomSizeSpeed = 0;
+        let randomZoomSpeed = 0;
+        let randomSizeCurrent = 1.0;
+        let randomZoomCurrent = 1.0;
+
+        let selfieSegmentation = null;
+        let backgroundImage = null;
+        let isBackgroundRemovalActive = false;
+        let webcamCanvas = null;
+        let webcamCanvasCtx = null;
+        let backgroundProcessingActive = false;
+
+        let editorImageElement = null;
+        let editorImageScale = 1;
+        let editorImageX = 0;
+        let editorImageY = 0;
+        let editorIsDragging = false;
+        let editorDragStartX = 0;
+        let editorDragStartY = 0;
+        let editorOriginalImage = null;
 
         // Audio functionality
         let audioContext = null;
@@ -3043,8 +4236,6 @@
             
             if (webcamToggle.classList.contains('active')) {
                 // Turn OFF webcam
-                closePictureInPictureIfActive();
-                
                 if (webcamStream) {
                     webcamStream.getTracks().forEach(track => track.stop());
                     webcamStream = null;
@@ -3057,12 +4248,6 @@
                 webcamSettingsWidget.style.display = 'none';
                 webcamVideoWidget.style.display = 'none';
                 webcamToggle.classList.remove('active');
-                
-                // Reset PiP state
-                const floatToggle = document.getElementById('webcamFloatToggle');
-                floatToggle.classList.remove('active');
-                isPictureInPicture = false;
-                pipWindow = null;
             } else {
                 // Turn ON webcam - try multiple approaches for compatibility
                 try {
@@ -3163,34 +4348,56 @@
             } else {
                 // Turn ON audio
                 try {
-                    // Get microphone access first (let browser choose optimal settings)
+                    // Get microphone access with settings optimized for recording
                     audioStream = await navigator.mediaDevices.getUserMedia({
                         audio: {
-                            echoCancellation: true,
-                            noiseSuppression: true,
-                            autoGainControl: false
+                            echoCancellation: false,  // Disable for cleaner recording
+                            noiseSuppression: false,  // Disable for cleaner recording
+                            autoGainControl: false,   // Manual control via gain slider
+                            channelCount: 2,          // Stereo for better quality
+                            sampleRate: 48000,        // High quality sample rate
+                            sampleSize: 16,
+                            latency: 0.01             // Low latency
                         }
                     });
                     
-                    // Initialize Web Audio API with default sample rate
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    // Validate audio stream
+                    const audioTracks = audioStream.getAudioTracks();
+                    if (audioTracks.length === 0) {
+                        throw new Error('No audio tracks available');
+                    }
                     
-                    console.log('Audio initialized at', audioContext.sampleRate + 'Hz');
+                    // Check audio track state
+                    const firstTrack = audioTracks[0];
+                    if (firstTrack.readyState !== 'live') {
+                        throw new Error('Audio track is not live');
+                    }
                     
-                    // Setup audio processing
-                    audioSource = audioContext.createMediaStreamSource(audioStream);
+                    console.log('Audio track initialized:', firstTrack.getSettings());
+                    
+                    // Initialize Web Audio API for monitoring only (not recording)
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)({
+                        sampleRate: 48000
+                    });
+                    
+                    console.log('Audio monitoring initialized at', audioContext.sampleRate + 'Hz');
+                    
+                    // Create monitoring chain (separate from recording stream)
+                    const monitoringStream = audioStream.clone();
+                    audioSource = audioContext.createMediaStreamSource(monitoringStream);
                     gainNode = audioContext.createGain();
                     audioAnalyser = audioContext.createAnalyser();
-                    audioAnalyser.fftSize = 256;
+                    audioAnalyser.fftSize = 512;
+                    audioAnalyser.smoothingTimeConstant = 0.3;
                     
-                    // Connect audio nodes
+                    // Connect monitoring nodes (this doesn't affect the original stream)
                     audioSource.connect(gainNode);
                     gainNode.connect(audioAnalyser);
                     
-                    // Set initial gain (50%)
+                    // Set initial gain (50%) - this only affects monitoring
                     gainNode.gain.value = 0.5;
                     
-                    // Show AAS widget with proper display
+                    // Show AAS widget
                     audioSettingsWidget.style.display = 'block';
                     audioSettingsWidget.classList.add('show');
                     audioToggle.classList.add('active');
@@ -3199,7 +4406,7 @@
                     // Start audio meter updates
                     startAudioMeters();
                     
-                    console.log('Audio initialized: 48kHz, stereo, noise suppression ON');
+                    console.log('Audio ready: 48kHz stereo, monitoring enabled, original stream preserved');
                     
                 } catch (err) {
                     console.error('Audio access failed:', err);
@@ -3273,219 +4480,7 @@
         // Check webcam status every 2 seconds
         setInterval(keepWebcamAlive, 2000);
 
-        function getPopupFormatStyle() {
-            const webcamContainer = document.getElementById('webcamContainer');
-            const currentFormat = currentWebcamFormat;
-            
-            let style = {
-                bodyStyle: '',
-                containerStyle: '',
-                videoStyle: '',
-                label: 'COLOGGER'
-            };
-            
-            switch(currentFormat) {
-                case '16:9':
-                    style.containerStyle = 'border-radius: 12px;';
-                    style.videoStyle = 'border-radius: 8px;';
-                    style.label = 'COLOG 16:9';
-                    break;
-                    
-                case '9:16':
-                    style.containerStyle = 'border-radius: 12px;';
-                    style.videoStyle = 'border-radius: 8px;';
-                    style.label = 'COLOG 9:16';
-                    break;
-                    
-                case 'round':
-                    style.containerStyle = 'border-radius: 50%;';
-                    style.videoStyle = 'border-radius: 50%;';
-                    style.label = 'COLOG ⭕';
-                    break;
-                    
-                case 'random':
-                    if (currentRandomFormat) {
-                        style.containerStyle = `
-                            border-radius: ${currentRandomFormat.borderRadius};
-                            ${currentRandomFormat.clipPath !== 'none' ? `clip-path: ${currentRandomFormat.clipPath};` : ''}
-                        `;
-                        style.videoStyle = `
-                            border-radius: ${currentRandomFormat.borderRadius};
-                            ${currentRandomFormat.clipPath !== 'none' ? `clip-path: ${currentRandomFormat.clipPath};` : ''}
-                        `;
-                        style.label = 'COLOG 🎲';
-                        
-                        // Special handling for complex shapes
-                        if (currentRandomFormat.clipPath.includes('polygon')) {
-                            if (currentRandomFormat.clipPath.includes('50% 0%, 100% 25%')) {
-                                style.label = 'COLOG ⬡'; // Hexagon
-                            } else if (currentRandomFormat.clipPath.includes('61% 35%')) {
-                                style.label = 'COLOG ⭐'; // Star
-                            } else if (currentRandomFormat.clipPath.includes('100% 50%')) {
-                                style.label = 'COLOG ♦️'; // Diamond
-                            } else if (currentRandomFormat.clipPath.includes('30% 0%')) {
-                                style.label = 'COLOG ⬛'; // Octagon
-                            }
-                        }
-                    }
-                    break;
-                    
-                default:
-                    style.containerStyle = 'border-radius: 12px;';
-                    style.videoStyle = 'border-radius: 8px;';
-                    break;
-            }
-            
-            return style;
-        }
 
-        async function togglePictureInPicture() {
-            const floatToggle = document.getElementById('webcamFloatToggle');
-            const webcamVideo = document.getElementById('webcamVideo');
-            const webcamVideoWidget = document.getElementById('webcamVideoWidget');
-            
-            if (!webcamVideo || !webcamStream) {
-                alert('Please turn on webcam first!');
-                return;
-            }
-            
-            try {
-                if (!isPictureInPicture) {
-                    // Try multiple PiP approaches for maximum compatibility
-                    let pipSuccess = false;
-                    
-                    // Method 1: Standard PiP API
-                    if (!pipSuccess && document.pictureInPictureEnabled && webcamVideo.requestPictureInPicture) {
-                        try {
-                            pipWindow = await webcamVideo.requestPictureInPicture();
-                            pipSuccess = true;
-                        } catch (pipErr) {
-                            console.log('Standard PiP failed:', pipErr);
-                        }
-                    }
-                    
-                    // Method 2: Check if video element supports PiP
-                    if (!pipSuccess && 'requestPictureInPicture' in webcamVideo) {
-                        try {
-                            pipWindow = await webcamVideo.requestPictureInPicture();
-                            pipSuccess = true;
-                        } catch (pipErr) {
-                            console.log('Video PiP failed:', pipErr);
-                        }
-                    }
-                    
-                    // Method 3: Popup window fallback for all browsers
-                    if (!pipSuccess) {
-                        try {
-                            // Create a simple popup with webcam
-                            const popupWidth = 300;
-                            const popupHeight = 200;
-                            const left = screen.width - popupWidth - 50;
-                            const top = 50;
-                            
-                            pipWindow = window.open('', 'cologgerWebcam', 
-                                `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,alwaysOnTop=yes`);
-                            
-                            if (pipWindow) {
-                                pipWindow.document.write(`
-                                    <!DOCTYPE html>
-                                    <html>
-                                    <head>
-                                        <title>🎬 COLOGGER Webcam</title>
-                                        <style>
-                                            body { margin: 0; padding: 0; background: #2C3E50; overflow: hidden; }
-                                            video { width: 100%; height: 100%; object-fit: cover; }
-                                            .label { position: absolute; top: 5px; left: 5px; color: white; font-size: 10px; font-family: sans-serif; }
-                                        </style>
-                                    </head>
-                                    <body>
-                                        <div class="label">🎬 COLOGGER</div>
-                                        <video id="popupWebcam" autoplay muted playsinline></video>
-                                    </body>
-                                    </html>
-                                `);
-                                pipWindow.document.close();
-                                
-                                // Clone the video stream to popup
-                                const popupVideo = pipWindow.document.getElementById('popupWebcam');
-                                if (popupVideo && webcamStream) {
-                                    popupVideo.srcObject = webcamStream;
-                                }
-                                
-                                pipSuccess = true;
-                            }
-                        } catch (popupErr) {
-                            console.log('Popup fallback failed:', popupErr);
-                        }
-                    }
-                    
-                    if (pipSuccess) {
-                        // Success - setup floating state
-                        webcamVideoWidget.style.opacity = '0.3';
-                        webcamVideoWidget.style.pointerEvents = 'none';
-                        floatToggle.classList.add('active');
-                        isPictureInPicture = true;
-                        
-                        // Universal close handlers
-                        const handleClose = () => {
-                            webcamVideoWidget.style.opacity = '1';
-                            webcamVideoWidget.style.pointerEvents = 'auto';
-                            floatToggle.classList.remove('active');
-                            isPictureInPicture = false;
-                            pipWindow = null;
-                        };
-                        
-                        // For real PiP
-                        document.addEventListener('leavepictureinpicture', handleClose);
-                        
-                        // For popup window
-                        if (pipWindow && pipWindow.window) {
-                            const checkClosed = setInterval(() => {
-                                if (pipWindow.closed) {
-                                    clearInterval(checkClosed);
-                                    handleClose();
-                                }
-                            }, 1000);
-                        }
-                        
-                        // For PiP window events
-                        if (pipWindow && pipWindow.addEventListener) {
-                            pipWindow.addEventListener('resize', () => {
-                                console.log('PiP resized');
-                            });
-                        }
-                        
-                    } else {
-                        alert('Floating webcam not available. Please allow popups or use a supported browser.');
-                    }
-                } else {
-                    // Exit Picture-in-Picture
-                    if (document.pictureInPictureElement) {
-                        await document.exitPictureInPicture();
-                    }
-                    
-                    webcamVideoWidget.style.opacity = '1';
-                    webcamVideoWidget.style.pointerEvents = 'auto';
-                    floatToggle.classList.remove('active');
-                    isPictureInPicture = false;
-                    pipWindow = null;
-                }
-                
-            } catch (err) {
-                console.error('Picture-in-Picture failed:', err);
-                alert('Could not enable Picture-in-Picture: ' + err.message);
-                floatToggle.classList.remove('active');
-            }
-        }
-
-        // Make sure PiP closes properly when webcam is turned off
-        function closePictureInPictureIfActive() {
-            if (isPictureInPicture && document.pictureInPictureElement) {
-                document.exitPictureInPicture().catch(err => {
-                    console.log('Error closing PiP:', err);
-                });
-            }
-        }
 
         function applyWebcamFormat(format) {
             const webcamContainer = document.getElementById('webcamContainer');
@@ -3619,21 +4614,28 @@
                 });
             });
 
-            // Initialize webcam toggles
-            const sizeTrack = document.querySelector('#webcamSizeToggle .webcam-toggle-track');
-            const zoomTrack = document.querySelector('#webcamZoomToggle .webcam-toggle-track');
-            const floatTrack = document.querySelector('#webcamFloatToggle .webcam-toggle-track');
+            // Initialize webcam sliders
+            const sizeSlider = document.getElementById('webcamSizeSlider');
+            const zoomSlider = document.getElementById('webcamZoomSlider');
+            const sizeValue = document.getElementById('sizeValue');
+            const zoomValue = document.getElementById('zoomValue');
             
-            sizeTrack.addEventListener('click', function() {
-                toggleWebcamSize();
+            sizeSlider.addEventListener('input', function() {
+                const value = this.value / 100; // Convert 50-300 to 0.5-3.0
+                currentWebcamSize = value;
+                sizeValue.textContent = value.toFixed(1) + 'x';
+                
+                // Re-apply current format with new size
+                applyWebcamFormat(currentWebcamFormat);
             });
             
-            zoomTrack.addEventListener('click', function() {
-                toggleWebcamZoom();
-            });
-            
-            floatTrack.addEventListener('click', function() {
-                togglePictureInPicture();
+            zoomSlider.addEventListener('input', function() {
+                const value = this.value / 100; // Convert 100-500 to 1.0-5.0
+                currentWebcamZoom = value;
+                zoomValue.textContent = value.toFixed(1) + 'x';
+                
+                // Apply zoom
+                applyWebcamZoom();
             });
             
             // Initialize audio controls
@@ -3681,36 +4683,388 @@
             });
         }
 
-        function toggleWebcamSize() {
-            const sizeToggle = document.getElementById('webcamSizeToggle');
-            sizeToggle.classList.toggle('active');
-            
-            currentWebcamSize = sizeToggle.classList.contains('active') ? 'big' : 'small';
-            
-            // Re-apply current format with new size (but keep same random format)
-            applyWebcamFormat(currentWebcamFormat);
-        }
 
-        function toggleWebcamZoom() {
-            const zoomToggle = document.getElementById('webcamZoomToggle');
-            zoomToggle.classList.toggle('active');
-            
-            currentWebcamZoom = zoomToggle.classList.contains('active') ? 'zoom' : 'normal';
-            applyWebcamZoom();
-        }
 
         function applyWebcamZoom() {
             const webcamVideo = document.getElementById('webcamVideo');
+            const webcamCanvas = document.getElementById('webcamCanvas');
             
-            if (currentWebcamZoom === 'zoom') {
-                webcamVideo.style.transform = 'scale(1.5)';
-            } else {
-                webcamVideo.style.transform = 'scale(1)';
-            }
+            webcamVideo.style.transform = `scale(${currentWebcamZoom})`;
+            webcamCanvas.style.transform = `scale(${currentWebcamZoom})`;
         }
 
         function getSizeMultiplier() {
-            return currentWebcamSize === 'big' ? 1.4 : 1.0;
+            return currentWebcamSize;
+        }
+
+        // Draggable number inputs
+        function initDraggableInputs() {
+            const draggableInputs = document.querySelectorAll('.automation-input');
+            
+            draggableInputs.forEach(input => {
+                let isDragging = false;
+                let startY = 0;
+                let startValue = 0;
+                
+                input.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    startY = e.clientY;
+                    startValue = parseFloat(input.value);
+                    input.style.cursor = 'ns-resize';
+                    e.preventDefault();
+                });
+                
+                document.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    
+                    const deltaY = startY - e.clientY; // Inverted: drag up = increase
+                    const min = parseFloat(input.min);
+                    const max = parseFloat(input.max);
+                    const step = parseFloat(input.step);
+                    
+                    // Calculate sensitivity based on step
+                    const sensitivity = step * 0.5; // 0.5 pixels per step
+                    const change = deltaY * sensitivity;
+                    
+                    let newValue = startValue + change;
+                    
+                    // Clamp to min/max
+                    newValue = Math.max(min, Math.min(max, newValue));
+                    
+                    // Round to step
+                    newValue = Math.round(newValue / step) * step;
+                    
+                    input.value = newValue.toFixed(1);
+                    
+                    // Trigger input event so any listeners get updated
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+                
+                document.addEventListener('mouseup', () => {
+                    if (isDragging) {
+                        isDragging = false;
+                        input.style.cursor = '';
+                    }
+                });
+            });
+        }
+
+        async function initBackgroundRemoval() {
+            const aiStatus = document.getElementById('aiStatus');
+            const backgroundPreview = document.getElementById('backgroundPreview');
+            const fileInput = document.getElementById('backgroundFileInput');
+            
+            webcamCanvas = document.getElementById('webcamCanvas');
+            webcamCanvasCtx = webcamCanvas.getContext('2d');
+
+            backgroundPreview.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const img = new Image();
+                        img.onload = function() {
+                            editorOriginalImage = img;
+                            openBackgroundEditor(event.target.result);
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            const backgroundToggle = document.getElementById('backgroundToggle');
+            const backgroundTrack = backgroundToggle.querySelector('.background-toggle-track');
+
+            backgroundTrack.addEventListener('click', async function() {
+                if (!backgroundToggle.classList.contains('active')) {
+                    if (!backgroundImage) {
+                        alert('Please upload a background image first!');
+                        return;
+                    }
+                    
+                    if (!selfieSegmentation) {
+                        try {
+                            aiStatus.textContent = 'Loading AI...';
+                            aiStatus.className = 'ai-status loading';
+
+                            selfieSegmentation = new SelfieSegmentation({
+                                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
+                            });
+
+                            selfieSegmentation.setOptions({
+                                modelSelection: 1,
+                                selfieMode: false
+                            });
+
+                            selfieSegmentation.onResults(onSegmentationResults);
+
+                            aiStatus.textContent = 'AI Ready';
+                            aiStatus.className = 'ai-status';
+                        } catch (error) {
+                            aiStatus.textContent = 'AI Failed';
+                            aiStatus.className = 'ai-status error';
+                            alert('AI initialization failed: ' + error.message);
+                            return;
+                        }
+                    }
+
+                    backgroundToggle.classList.add('active');
+                    isBackgroundRemovalActive = true;
+                    startBackgroundProcessing();
+                } else {
+                    backgroundToggle.classList.remove('active');
+                    isBackgroundRemovalActive = false;
+                    stopBackgroundProcessing();
+                }
+            });
+        }
+
+        function startBackgroundProcessing() {
+            const webcamVideo = document.getElementById('webcamVideo');
+            
+            if (!webcamStream) {
+                alert('Please enable webcam first!');
+                return;
+            }
+
+            backgroundProcessingActive = true;
+            webcamCanvas.classList.add('active');
+            webcamVideo.classList.add('background-active');
+
+            async function processFrame() {
+                if (!backgroundProcessingActive) return;
+                await selfieSegmentation.send({ image: webcamVideo });
+                requestAnimationFrame(processFrame);
+            }
+
+            processFrame();
+        }
+
+        function onSegmentationResults(results) {
+            if (!backgroundProcessingActive) return;
+
+            webcamCanvas.width = results.image.width;
+            webcamCanvas.height = results.image.height;
+
+            webcamCanvasCtx.save();
+            webcamCanvasCtx.clearRect(0, 0, webcamCanvas.width, webcamCanvas.height);
+            
+            webcamCanvasCtx.drawImage(results.segmentationMask, 0, 0, webcamCanvas.width, webcamCanvas.height);
+            
+            webcamCanvasCtx.globalCompositeOperation = 'source-out';
+            if (backgroundImage) {
+                webcamCanvasCtx.drawImage(backgroundImage, 0, 0, webcamCanvas.width, webcamCanvas.height);
+            }
+            
+            webcamCanvasCtx.globalCompositeOperation = 'destination-over';
+            webcamCanvasCtx.drawImage(results.image, 0, 0, webcamCanvas.width, webcamCanvas.height);
+            
+            webcamCanvasCtx.restore();
+        }
+
+        function stopBackgroundProcessing() {
+            backgroundProcessingActive = false;
+            webcamCanvas.classList.remove('active');
+            document.getElementById('webcamVideo').classList.remove('background-active');
+        }
+
+        function openBackgroundEditor(imageSrc) {
+            const modal = document.getElementById('backgroundEditorModal');
+            const previewArea = document.getElementById('editorPreviewArea');
+            const imageElement = document.getElementById('editorImage');
+            const formatOverlay = document.getElementById('editorFormatOverlay');
+            const zoomSlider = document.getElementById('editorZoomSlider');
+            const zoomValue = document.getElementById('editorZoomValue');
+
+            editorImageElement = imageElement;
+            imageElement.src = imageSrc;
+
+            imageElement.onload = function() {
+                const areaWidth = previewArea.clientWidth;
+                const areaHeight = previewArea.clientHeight;
+                const imgRatio = imageElement.naturalWidth / imageElement.naturalHeight;
+                const areaRatio = areaWidth / areaHeight;
+
+                if (imgRatio > areaRatio) {
+                    imageElement.style.height = areaHeight + 'px';
+                    imageElement.style.width = (areaHeight * imgRatio) + 'px';
+                } else {
+                    imageElement.style.width = areaWidth + 'px';
+                    imageElement.style.height = (areaWidth / imgRatio) + 'px';
+                }
+
+                editorImageScale = 1;
+                editorImageX = 0;
+                editorImageY = 0;
+                updateEditorImage();
+                updateFormatOverlay();
+            };
+
+            zoomSlider.addEventListener('input', function() {
+                editorImageScale = this.value / 100;
+                zoomValue.textContent = editorImageScale.toFixed(1) + 'x';
+                updateEditorImage();
+            });
+
+            previewArea.addEventListener('mousedown', startEditorDrag);
+            previewArea.addEventListener('wheel', handleEditorScroll, { passive: false });
+            document.addEventListener('mousemove', doEditorDrag);
+            document.addEventListener('mouseup', stopEditorDrag);
+
+            zoomSlider.value = 100;
+            zoomValue.textContent = '1.0x';
+
+            modal.classList.add('show');
+        }
+
+        function handleEditorScroll(e) {
+            e.preventDefault();
+            
+            const delta = e.deltaY > 0 ? -0.1 : 0.1;
+            editorImageScale = Math.max(0.5, Math.min(3.0, editorImageScale + delta));
+            
+            const zoomSlider = document.getElementById('editorZoomSlider');
+            const zoomValue = document.getElementById('editorZoomValue');
+            zoomSlider.value = editorImageScale * 100;
+            zoomValue.textContent = editorImageScale.toFixed(1) + 'x';
+            
+            updateEditorImage();
+        }
+
+        function updateFormatOverlay() {
+            const overlay = document.getElementById('editorFormatOverlay');
+            const previewArea = document.getElementById('editorPreviewArea');
+            const areaWidth = previewArea.clientWidth;
+            const areaHeight = previewArea.clientHeight;
+
+            let overlayWidth, overlayHeight;
+
+            switch(currentWebcamFormat) {
+                case '16:9':
+                    if (areaWidth / areaHeight > 16/9) {
+                        overlayHeight = areaHeight * 0.8;
+                        overlayWidth = overlayHeight * (16/9);
+                    } else {
+                        overlayWidth = areaWidth * 0.8;
+                        overlayHeight = overlayWidth * (9/16);
+                    }
+                    overlay.style.borderRadius = '8px';
+                    break;
+                case '9:16':
+                    if (areaWidth / areaHeight < 9/16) {
+                        overlayWidth = areaWidth * 0.8;
+                        overlayHeight = overlayWidth * (16/9);
+                    } else {
+                        overlayHeight = areaHeight * 0.8;
+                        overlayWidth = overlayHeight * (9/16);
+                    }
+                    overlay.style.borderRadius = '8px';
+                    break;
+                case 'round':
+                    const maxSize = Math.min(areaWidth, areaHeight) * 0.8;
+                    overlayWidth = maxSize;
+                    overlayHeight = maxSize;
+                    overlay.style.borderRadius = '50%';
+                    break;
+                case 'random':
+                    if (currentRandomFormat) {
+                        const formatRatio = currentRandomFormat.width / currentRandomFormat.height;
+                        if (areaWidth / areaHeight > formatRatio) {
+                            overlayHeight = areaHeight * 0.8;
+                            overlayWidth = overlayHeight * formatRatio;
+                        } else {
+                            overlayWidth = areaWidth * 0.8;
+                            overlayHeight = overlayWidth / formatRatio;
+                        }
+                        overlay.style.borderRadius = currentRandomFormat.borderRadius;
+                    } else {
+                        const maxSize = Math.min(areaWidth, areaHeight) * 0.8;
+                        overlayWidth = maxSize;
+                        overlayHeight = maxSize;
+                        overlay.style.borderRadius = '8px';
+                    }
+                    break;
+            }
+
+            overlay.style.width = overlayWidth + 'px';
+            overlay.style.height = overlayHeight + 'px';
+        }
+
+        function updateEditorImage() {
+            if (!editorImageElement) return;
+            editorImageElement.style.transform = `translate(${editorImageX}px, ${editorImageY}px) scale(${editorImageScale})`;
+        }
+
+        function startEditorDrag(e) {
+            editorIsDragging = true;
+            editorDragStartX = e.clientX - editorImageX;
+            editorDragStartY = e.clientY - editorImageY;
+        }
+
+        function doEditorDrag(e) {
+            if (!editorIsDragging) return;
+            editorImageX = e.clientX - editorDragStartX;
+            editorImageY = e.clientY - editorDragStartY;
+            updateEditorImage();
+        }
+
+        function stopEditorDrag() {
+            editorIsDragging = false;
+        }
+
+        function saveBackgroundEdit() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const previewArea = document.getElementById('editorPreviewArea');
+            const overlay = document.getElementById('editorFormatOverlay');
+            const imageElement = document.getElementById('editorImage');
+
+            const overlayRect = overlay.getBoundingClientRect();
+            const areaRect = previewArea.getBoundingClientRect();
+            const imageRect = imageElement.getBoundingClientRect();
+
+            const cropX = overlayRect.left - imageRect.left;
+            const cropY = overlayRect.top - imageRect.top;
+            const cropWidth = overlayRect.width;
+            const cropHeight = overlayRect.height;
+
+            const scaleRatio = editorOriginalImage.naturalWidth / imageRect.width;
+
+            canvas.width = cropWidth;
+            canvas.height = cropHeight;
+
+            ctx.drawImage(
+                editorOriginalImage,
+                cropX * scaleRatio,
+                cropY * scaleRatio,
+                cropWidth * scaleRatio,
+                cropHeight * scaleRatio,
+                0, 0,
+                cropWidth, cropHeight
+            );
+
+            canvas.toBlob(function(blob) {
+                const croppedImg = new Image();
+                croppedImg.onload = function() {
+                    backgroundImage = croppedImg;
+                    const backgroundPreview = document.getElementById('backgroundPreview');
+                    backgroundPreview.innerHTML = `<img src="${croppedImg.src}">`;
+                };
+                croppedImg.src = URL.createObjectURL(blob);
+            });
+
+            closeBackgroundEditor();
+        }
+
+        function closeBackgroundEditor() {
+            const modal = document.getElementById('backgroundEditorModal');
+            modal.classList.remove('show');
+            editorImageElement = null;
         }
 
         function resetWidgetPositions() {
